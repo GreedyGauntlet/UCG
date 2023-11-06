@@ -1,0 +1,27 @@
+# binaries
+**/bin/
+bin-int/
+**/Intermediates/
+**/Debug/
+**/Binaries/
+**.dll
+**.pdb
+
+# VS files and folders
+.vs/
+**.sln
+**.vcxproj
+**.vcxproj.filters
+**.vcxproj.user
+**.cache
+**.csproj.AssemblyReference.cache
+
+# personal
+**.ini
+**.fnproj
+**.flora
+**.csproj
+
+# Directories
+Fauna/assets/cache
+scripts/__pycache__
