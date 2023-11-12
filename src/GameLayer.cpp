@@ -1,5 +1,6 @@
 #include "flpch.h"
 #include "GameLayer.h"
+#include "Flora/Renderer/Renderer2D.h"
 
 namespace Flora {
 
