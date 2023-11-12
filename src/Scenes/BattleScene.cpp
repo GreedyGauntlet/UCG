@@ -27,6 +27,10 @@ namespace UCG {
 		m_Camera = SceneUtils::MainCamera();
 	}
 
+	void BattleScene::Update(Flora::Timestep ts) {
+		GenericUpdate(ts);
+	}
+
 	void BattleScene::Stop() {
 
 	}
