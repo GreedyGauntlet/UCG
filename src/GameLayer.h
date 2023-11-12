@@ -15,5 +15,7 @@ namespace Flora {
 		void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
 		void OnEvent(Event& e) override;
+	private:
+		Scene* m_ActiveScene;
 	};
 }

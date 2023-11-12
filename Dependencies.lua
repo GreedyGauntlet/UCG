@@ -11,6 +11,8 @@ IncludeDir["entt"] = "%{wks.location}/vendor/flora/Flora/vendor/entt/include"
 IncludeDir["mono"] = "%{wks.location}/vendor/flora/Flora/vendor/mono/include"
 IncludeDir["filewatch"] = "%{wks.location}/vendor/flora/Flora/vendor/filewatch"
 IncludeDir["openAL"] = "%{wks.location}/vendor/flora/Flora/vendor/openAL/include"
+IncludeDir["msdfgen"] = "%{wks.location}/vendor/flora/Flora/vendor/msdf-atlas-gen/msdfgen"
+IncludeDir["msdfatlas"] = "%{wks.location}/vendor/flora/Flora/vendor/msdf-atlas-gen/msdf-atlas-gen"
 
 LibraryDir = {}
 LibraryDir["mono"] = "%{wks.location}/vendor/flora/Flora/vendor/mono/lib/%{cfg.buildcfg}"

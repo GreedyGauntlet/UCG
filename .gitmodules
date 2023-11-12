@@ -1,1 +1,4 @@
 
+[submodule "vendor/flora"]
+	path = vendor/flora
+	url = git@github.com:JHeflinger/flora.git
