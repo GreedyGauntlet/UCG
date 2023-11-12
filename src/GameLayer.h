@@ -1,9 +1,10 @@
 #pragma once
 #include "Flora.h"
 #include "Flora/Core/Layer.h"
+#include "Scenes/GameScene.h"
 
-namespace Flora {
-	class GameLayer : public Layer {
+namespace UCG {
+	class GameLayer : public Flora::Layer {
 	public:
 		GameLayer();
 		virtual ~GameLayer() = default;
@@ -12,10 +13,13 @@ namespace Flora {
 		virtual void ProcessWindowClose() override {};
 		virtual void OnAttatch() override;
 		virtual void OnDetatch() override;
-		void OnUpdate(Timestep ts) override;
+		void OnUpdate(Flora::Timestep ts) override;
 		virtual void OnImGuiRender() override;
-		void OnEvent(Event& e) override;
+		void OnEvent(Flora::Event& e) override;
 	private:
-		Scene* m_ActiveScene;
+		void PreUpdate();
+		void PostUpdate();
+	private:
+		GameScene* m_Scene;
 	};
 }

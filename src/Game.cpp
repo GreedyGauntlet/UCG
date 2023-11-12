@@ -5,9 +5,9 @@
 namespace Flora {
 	class Game : public Application {
 	public:
-		Game(ApplicationCommandLineArgs args)
+		Game(Flora::ApplicationCommandLineArgs args)
 			: Application("Untitled Card Game", args) {
-			PushLayer(new GameLayer());
+			PushLayer(new UCG::GameLayer());
 			//GetWindow().SetWindowIcon("Resources/Icons/Editor/Logo.png");
 		}
 
