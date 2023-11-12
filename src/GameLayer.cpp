@@ -14,8 +14,6 @@ namespace Flora {
 
 	void GameLayer::OnAttatch() {
 		RenderCommand::Init();
-		Renderer2D::Init();
-		m_ActiveScene = new Scene();
 	}
 
 	void GameLayer::OnDetatch() {
@@ -23,24 +21,20 @@ namespace Flora {
 
 	void GameLayer::OnUpdate(Timestep ts) {
 		Renderer2D::ResetStats();
-		RenderCommand::SetClearColor({ 0.9f, 0.1f, 0.1f, 1 });
+		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();
 
-		EditorCamera camera;
-		Renderer2D::BeginScene(camera.GetViewProjection());
-		Renderer2D::DrawCircle(glm::mat4(1.0f), glm::vec4(0, 1, 0, 1), 1.0f);
-		Renderer2D::EndScene();
+		SceneCamera camera;
+		camera.SetProjectionType(SceneCamera::ProjectionType::Orthographic);
+		camera.SetOrthographic(20.0f, -999.0f, 999.0f);
+		camera.SetViewportSize(1920, 1080);
 
-		/*
-		Entity entity = m_ActiveScene->CreateEntity("Camera");
-		Entity text = m_ActiveScene->CreateEntity("Text");
-		entity.AddComponent<CameraComponent>();
-		entity.GetComponent<CameraComponent>().Camera.SetOrthographic(10.0f, -10.0f, 10.0f);
-		text.AddComponent<TextComponent>().TextString = "wooooaah";
-		m_ActiveScene->SetPrimaryCamera((int)(uint32_t)entity);
-		m_ActiveScene->OnRuntimeStart();
-		m_ActiveScene->OnUpdateRuntime(ts);
-		m_ActiveScene->OnRuntimeStop();*/
+		Renderer2D::BeginScene(camera.GetProjection());
+		Renderer2D::DrawLine({-50, -50, -50}, {50, 50, 50});
+		TextConfig conf;
+		conf.TextString = "poooo";
+		Renderer2D::DrawString(conf);
+		Renderer2D::EndScene();
 	}
 
 	void GameLayer::OnImGuiRender() {
