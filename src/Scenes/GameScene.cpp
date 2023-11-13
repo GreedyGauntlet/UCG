@@ -21,7 +21,7 @@ namespace UCG {
 		Flora::RenderCommand::Clear();
 		RenderRuntime(ts, m_Camera->GetProjection());
 
-		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, 1600 - Flora::Input::GetMouseX(), 900 - Flora::Input::GetMouseY());
+		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, Flora::Input::GetMouseX(), 900 - Flora::Input::GetMouseY());
 
 		m_Framebuffer->Unbind();
 		Flora::Renderer2D::ResetStats();
@@ -39,6 +39,15 @@ namespace UCG {
 		if (EntityExists((uint32_t)m_HoveredEntity) && m_HoveredEntity > 0) {
 			return &(GetEntityFromID((uint32_t)m_HoveredEntity));
 		} return nullptr;
+	}
+
+	glm::vec2 GameScene::MouseCoordinates() {
+		glm::vec2 coords = { 0.0f, 0.0f };
+		double gamew = (double)m_Camera->GetOrthographicSize();
+		double gameh = gamew * (900.0 / 1600.0);
+		coords.x = (double)(gamew * 2 * (((double)Flora::Input::GetMouseX())/1600.0) - gamew);
+		coords.y = (double)(gameh * 2 * (((double)(900 - Flora::Input::GetMouseY())) / 900.0) - gameh);
+		return coords;
 	}
 
 }

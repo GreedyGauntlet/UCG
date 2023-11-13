@@ -10,6 +10,7 @@ namespace UCG {
 		virtual void Stop() = 0;
 	public:
 		Flora::Entity* HoveredEntity();
+		glm::vec2 MouseCoordinates();
 	protected:
 		void GenericUpdate(Flora::Timestep ts);
 	protected:
