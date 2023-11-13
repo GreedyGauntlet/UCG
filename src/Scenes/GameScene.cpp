@@ -43,7 +43,7 @@ namespace UCG {
 
 	glm::vec2 GameScene::MouseCoordinates() {
 		glm::vec2 coords = { 0.0f, 0.0f };
-		double gamew = (double)m_Camera->GetOrthographicSize();
+		double gamew = (double)m_Camera->GetOrthographicSize() - 0.72; //-0.72 for ???? reason? not sure why we have to correct this, look into this in flora later but rn its an internal correction prob ig
 		double gameh = gamew * (900.0 / 1600.0);
 		coords.x = (double)(gamew * 2 * (((double)Flora::Input::GetMouseX())/1600.0) - gamew);
 		coords.y = (double)(gameh * 2 * (((double)(900 - Flora::Input::GetMouseY())) / 900.0) - gameh);

@@ -24,11 +24,13 @@ namespace UCG {
 	void BattleScene::Start() {
 		OnRuntimeStart();
 		ResetBoard(test_map);
+		DrawHand();
+		UpdateHand(true);
 		m_Camera = SceneUtils::MainCamera();
 		m_Cursor = CreateEntity("Cursor");
-		m_Cursor.AddComponent<Flora::CircleRendererComponent>();
+		m_Cursor.AddComponent<Flora::CircleRendererComponent>().Fade = 1.0f;
 		m_Cursor.GetComponent<Flora::TransformComponent>().Translation.z = 998.0f;
-		m_Cursor.GetComponent<Flora::TransformComponent>().Scale = { 0.1f, 0.1f, 0.1f };
+		m_Cursor.GetComponent<Flora::TransformComponent>().Scale = { 0.2f, 0.2f, 0.2f };
 	}
 
 	void BattleScene::Update(Flora::Timestep ts) {
@@ -36,6 +38,7 @@ namespace UCG {
 		m_Cursor.GetComponent<Flora::TransformComponent>().Translation.y = MouseCoordinates().y;
 		GenericUpdate(ts);
 		UpdateBoard();
+		UpdateHand();
 	}
 
 	void BattleScene::Stop() {
@@ -82,17 +85,42 @@ namespace UCG {
 	bool BattleScene::TileCollision(Flora::Entity tile, glm::vec2 translation) {
 		glm::vec2 tiletr = tile.GetComponent<Flora::TransformComponent>().Translation;
 
-		//FL_CORE_INFO("{}, {}", translation.x, translation.y);
 		if (translation.x > tiletr.x - 0.5f &&
 			translation.x < tiletr.x + 0.5f &&
 			translation.y > tiletr.y - 0.5f &&
 			translation.y < tiletr.y) {
 			float rely = translation.y - tiletr.y;
 			float relx = translation.x - tiletr.x;
-			FL_CORE_INFO("{}, {}", relx, rely);
+			if (rely > (-0.5f * relx) ||
+				rely > (0.5f * relx) ||
+				rely < (relx * 0.5f - 0.5f) ||
+				rely < (relx * -0.5f - 0.5f)) {
+				return false;
+			}
 			return true;
 		}
 		return false;
+	}
+
+	void BattleScene::DrawHand() {
+		m_Hand.clear();
+		for (int i = 0; i < 5; i++) {
+			std::pair<Flora::Entity, Card> pair = { CreateEntity("Card"), Player::GetDeck()->Draw() };
+			pair.first.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Card.png";
+			pair.first.GetComponent<Flora::TransformComponent>().Translation = { 0.0f, 0.0f, 1.0f };
+			pair.first.GetComponent<Flora::TransformComponent>().Scale = { 1.0f, 1.5f, 1.0f };
+			m_Hand.push_back(pair);
+		}
+	}
+
+	void BattleScene::UpdateHand(bool fast) {
+		glm::vec3 origin = { 2.0f, -2.3f, 1.0f };
+		for (int i = 0; i < m_Hand.size(); i++) {
+			if (fast) {
+				m_Hand[i].first.GetComponent<Flora::TransformComponent>().Translation = { origin.x + 0.75f * i, origin.y, origin.z + 0.01f * i };
+				m_Hand[i].first.GetComponent<Flora::TransformComponent>().Rotation = { 0.0f, 0.0f, glm::radians(((float)(m_Hand.size() - (i + 1)) / (float)m_Hand.size()) * 45.0f) };
+			}
+		}
 	}
 
 }

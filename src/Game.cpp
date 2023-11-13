@@ -5,8 +5,8 @@
 namespace Flora {
 	class Game : public Application {
 	public:
-		Game(Flora::ApplicationCommandLineArgs args)
-			: Application("Untitled Card Game", args) {
+		Game(const WindowProps& props, ApplicationCommandLineArgs args)
+			: Application(props, "", args) {
 			PushLayer(new UCG::GameLayer());
 			//GetWindow().SetWindowIcon("Resources/Icons/Editor/Logo.png");
 		}
@@ -17,6 +17,11 @@ namespace Flora {
 	};
 
 	Application* CreateApplication(ApplicationCommandLineArgs args) {
-		return new Game(args);
+		WindowProps props;
+		props.Title = "Untitled Card Game";
+		props.Width = 1600;
+		props.Height = 900;
+		props.Fullscreen = false;
+		return new Game(props, args);
 	}
 }
