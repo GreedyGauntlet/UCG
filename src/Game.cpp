@@ -8,7 +8,7 @@ namespace Flora {
 		Game(const WindowProps& props, ApplicationCommandLineArgs args)
 			: Application(props, "", args) {
 			PushLayer(new UCG::GameLayer());
-			//GetWindow().SetWindowIcon("Resources/Icons/Editor/Logo.png");
+			GetWindow().SetWindowIcon("assets/templogo.png");
 		}
 
 		~Game() {
