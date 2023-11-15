@@ -3,7 +3,7 @@
 #include "Flora/Scene/Scene.h"
 
 namespace UCG {
-	class GameScene : protected Flora::Scene {
+	class GameScene : public Flora::Scene {
 	public:
 		virtual void Start() = 0;
 		virtual void Update(Flora::Timestep ts);

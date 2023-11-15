@@ -1,14 +1,8 @@
 #pragma once
 #include "Flora.h"
+#include "CardDictionary.h"
 
 namespace UCG {
-	struct Card {
-		std::string Name = "";
-		std::string Description = "";
-		int64_t ID = -1;
-		int Cost = 0;
-	};
-
 	struct Deck {
 		std::vector<Card> Cards;
 		Card Draw() {

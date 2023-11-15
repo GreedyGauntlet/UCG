@@ -2,6 +2,7 @@
 #include "GameScene.h"
 #include "../Utils/BoardUtils.h"
 #include "../Core/Player.h"
+#include "../Core/CardDictionary.h"
 
 namespace UCG {
 	enum class BattleState {
@@ -26,7 +27,7 @@ namespace UCG {
 
 	struct BattleStats {
 		int PlayerHealth = 10;
-		int PlayerMana = 8;
+		int PlayerMana = 28;
 	};
 
 	class BattleScene : public GameScene {
@@ -36,18 +37,23 @@ namespace UCG {
 		virtual void Stop() override;
 	private:
 		void CreateUI();
+		void UpdateUI();
 	private:
 		void DrawHand();
 		void DrawCard();
-		void UpdateHand(bool fast = false);
+		bool ActivateCard(int cardIndex);
+		void UpdateHand(Flora::Timestep ts, bool fast = false);
+		void UpdateSpell();
 	private:
 		void ResetBoard(const Board board);
+		void CleanBoard();
 		void DeleteBoard();
 		void UpdateBoard();
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
 	private:
 		void UpdateBattleState();
 	private:
+		bool CheckHovered(Flora::Entity entity);
 		void DevCall();
 	private:
 		std::vector<std::vector<Flora::Entity>> m_BoardEntities;
@@ -56,5 +62,6 @@ namespace UCG {
 		BattleStats m_Stats;
 		BattleState m_State = BattleState::PREPLAYER;
 		int m_SelectedCard = -1;
+		CardID m_CurrentSpell = CardID::NONE;
 	};
 }

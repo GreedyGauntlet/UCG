@@ -2,6 +2,7 @@
 #include "Flora/Core/MouseCodes.h"
 #include "Flora/Core/KeyCodes.h"
 #include "../Utils/SceneUtils.h"
+#include "../VFX/VFX.h"
 
 namespace UCG {
 
@@ -28,16 +29,17 @@ namespace UCG {
 		CreateUI();
 		ResetBoard(test_map);
 		DrawHand();
-		UpdateHand(false);
 		m_Camera = SceneUtils::MainCamera();
 	}
 
 	void BattleScene::Update(Flora::Timestep ts) {
 		GenericUpdate(ts);
 		UpdateBoard();
-		UpdateHand();
+		UpdateHand(ts);
+		UpdateUI();
 		UpdateBattleState();
 		DevCall();
+		UpdateSpell();
 	}
 
 	void BattleScene::Stop() {
@@ -48,15 +50,16 @@ namespace UCG {
 		DeleteBoard();
 		int b_width = board.size();
 		int b_height = board[0].size();
-		glm::vec3 map_origin = { 0.0f, 2.0f, 0.0f };
+		glm::vec3 map_origin = { 0.0f, 2.0f, -1.0f };
 		for (int r = 0; r < b_width; r++) {
 			std::vector<Flora::Entity> row;
 			for (int c = 0; c < b_height; c++) {
-				Flora::Entity tile = CreateEntity("Tile");
+				std::string tilename = " ";
+				tilename[0] = board[r][c];
+				Flora::Entity tile = CreateEntity(tilename);
 				tile.AddComponent<Flora::SpriteRendererComponent>();
 				tile.GetComponent<Flora::SpriteRendererComponent>().Path = BoardUtils::TilePath(board[r][c]);
-				tile.GetComponent<Flora::TransformComponent>().Translation.x = map_origin.x + (-0.5f * r + (0.5f * c));
-				tile.GetComponent<Flora::TransformComponent>().Translation.y = map_origin.y + (-0.25f * c - (0.25f * r));
+				tile.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
 			}
 			m_BoardEntities.push_back(row);
@@ -71,6 +74,7 @@ namespace UCG {
 	}
 
 	void BattleScene::UpdateBoard() {
+		/*
 		glm::vec2 tr = MouseCoordinates();
 		for (int r = 0; r < m_BoardEntities.size(); r++) {
 			for (int c = 0; c < m_BoardEntities.size(); c++) {
@@ -78,7 +82,7 @@ namespace UCG {
 					m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
 				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			}
-		}
+		}*/
 	}
 
 	bool BattleScene::TileCollision(Flora::Entity tile, glm::vec2 translation) {
@@ -106,9 +110,10 @@ namespace UCG {
 		for (int i = 0; i < 5; i++) DrawCard();
 	}
 
-	void BattleScene::UpdateHand(bool fast) {
+	void BattleScene::UpdateHand(Flora::Timestep ts, bool fast) {
 		// move cards to respective hand pos
 		float base_padding = 0.75f;
+		float card_speed = (float)ts * 60.0f;
 		if (m_Hand.size() > 6)
 			base_padding = (base_padding * 6.0f) / (float)m_Hand.size();
 		glm::vec3 origin = { 5.0f - (base_padding * (float)m_Hand.size()), -2.3f, 1.0f };
@@ -126,34 +131,41 @@ namespace UCG {
 				tc.Rotation = dest_rt;
 			} else {
 				glm::vec3 curr_tr = tc.Translation;
-				glm::vec3 move_tr = {
+				glm::vec3 move_tr = card_speed * glm::vec3(
 					std::abs((dest_tr.x - curr_tr.x) / 5.0f) > threshold ? (dest_tr.x - curr_tr.x) / 5.0f : 0.0f,
 					std::abs((dest_tr.y - curr_tr.y) / 5.0f) > threshold ? (dest_tr.y - curr_tr.y) / 5.0f : 0.0f,
 					0.0f
-				};
+				);
 				tc.Translation += move_tr;
 				tc.Translation.z = dest_tr.z;
 
 				glm::vec3 curr_rt = tc.Rotation;
-				glm::vec3 move_rt = {
+				glm::vec3 move_rt = card_speed * glm::vec3(
 					0.0f,
 					0.0f,
 					std::abs((dest_rt.z - curr_rt.z) / 10.0f) > threshold ? (dest_rt.z - curr_rt.z) / 10.0f : 0.0f
-				};
+				);
 				tc.Rotation += move_rt;
 			}
 		}
 
 		// card hover highlighting
-		Flora::Entity* he = HoveredEntity();
-		if (he) {
-			for (int i = 0; i < m_Hand.size(); i++) {
-				Flora::Entity card = m_Hand[i].first;
-				Flora::SpriteRendererComponent& src = card.GetComponent<Flora::SpriteRendererComponent>();
-				if (*he == card)
-					src.Color = { 0.5f, 0.5f, 1.0f, 1.0f };
-				else src.Color = glm::vec4(1.0f);
-			}
+		for (int i = 0; i < m_Hand.size(); i++) {
+			Flora::Entity card = m_Hand[i].first;
+			Flora::SpriteRendererComponent& src = card.GetComponent<Flora::SpriteRendererComponent>();
+			if (CheckHovered(card))
+				src.Color = { 0.5f, 0.5f, 1.0f, 1.0f };
+			else
+				src.Color = glm::vec4(1.0f);
+		}
+
+		// card activation
+		if (m_SelectedCard >= 0) {
+			Flora::Entity card = m_Hand[m_SelectedCard].first;
+			if (card.GetComponent<Flora::TransformComponent>().Translation.y > -1.0f)
+				card.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
+			if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0))
+				ActivateCard(m_SelectedCard);
 		}
 
 		// card dragging
@@ -161,7 +173,7 @@ namespace UCG {
 		else if (m_SelectedCard < 0)
 			if (HoveredEntity())
 				for (int i = 0; i < m_Hand.size(); i++)
-					if (m_Hand[i].first == *HoveredEntity())
+					if (CheckHovered(m_Hand[i].first))
 						m_SelectedCard = i;
 	}
 
@@ -197,6 +209,8 @@ namespace UCG {
 			DrawCard();
 			m_State = BattleState::PLAYER;
 			break;
+		case BattleState::PLAYER:
+			break;
 		}
 	}
 
@@ -205,6 +219,23 @@ namespace UCG {
 		pair.first.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Card.png";
 		pair.first.GetComponent<Flora::TransformComponent>().Translation = { 0.0f, 0.0f, 1.0f };
 		pair.first.GetComponent<Flora::TransformComponent>().Scale = { 1.0f, 1.5f, 1.0f };
+		
+		Flora::ChildComponent& cc = pair.first.AddComponent<Flora::ChildComponent>();
+		for (int i = 0; i < pair.second.Cost; i++) {
+			Flora::Entity mana_node = CreateEntity("Mana Node");
+			mana_node.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Cards/Decorators/Mana Badge.png";
+			mana_node.GetComponent<Flora::TransformComponent>().Translation = { -0.29f + (i%7 * 0.1f), -0.27f - (i/7 * 0.1f), 0.001f };
+			mana_node.GetComponent<Flora::TransformComponent>().Scale = { 8.0f/72.0f, 8.0f/108.0f, 1.0f };
+			mana_node.AddComponent<Flora::ParentComponent>().Parent = pair.first;
+			cc.AddChild(mana_node);
+		}
+
+		Flora::Entity splash_art = CreateEntity("Splash Art");
+		splash_art.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Cards/Splash Art/" + pair.second.Name + ".png";
+		splash_art.GetComponent<Flora::TransformComponent>().Translation = { 0.0f, 0.0f, 0.002f };
+		splash_art.AddComponent<Flora::ParentComponent>().Parent = pair.first;
+		cc.AddChild(splash_art);
+
 		m_Hand.push_back(pair);
 	}
 
@@ -218,6 +249,104 @@ namespace UCG {
 		}
 		else if (Flora::Input::IsKeyPressed(Flora::Key::D)) {
 			d_down = true;
+		}
+	}
+
+	bool BattleScene::CheckHovered(Flora::Entity entity) {
+		Flora::Entity* he = HoveredEntity();
+		if (he) {
+			if (entity == *he) return true;
+			if (entity.HasComponent<Flora::ChildComponent>())
+				for (auto child : entity.GetComponent<Flora::ChildComponent>().Children)
+					if (child == *he)
+						return true;
+		}
+		return false;
+	}
+
+	bool BattleScene::ActivateCard(int cardIndex) {
+		Flora::Entity card = m_Hand[cardIndex].first;
+		Card info = m_Hand[cardIndex].second;
+
+		if (m_Stats.PlayerMana >= info.Cost) {
+			m_Stats.PlayerMana -= info.Cost;
+			m_CurrentSpell = info.ID;
+			m_Hand.erase(m_Hand.begin() + cardIndex);
+			DestroyEntity(card);
+			return true;
+		}
+		return false;
+	}
+
+	void BattleScene::UpdateUI() {
+		for (int i = 0; i < m_UI.PUI.Mana.size(); i++) {
+			Flora::Entity mana = m_UI.PUI.Mana[i];
+			if (i + 1 > m_Stats.PlayerMana) {
+				m_UI.PUI.Mana.erase(m_UI.PUI.Mana.begin() + i);
+				DestroyEntity(mana);
+				i--;
+				continue;
+			}
+			mana.GetComponent<Flora::TransformComponent>().Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.28f * (i + 1) + 0.4f, 0.0f, 0.0f);
+		}
+	}
+
+	void BattleScene::CleanBoard() {
+		for (int r = 0; r < m_BoardEntities.size(); r++) {
+			for (int c = 0; c < m_BoardEntities.size(); c++) {
+				m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = glm::vec4(1.0f);
+			}
+		}
+	}
+
+	void BattleScene::UpdateSpell() {
+
+		static bool mousepressed = Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0);
+		bool mousereleased = false;
+		if (mousepressed) {
+			if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0)) {
+				mousereleased = true;
+				mousepressed = false;
+			}
+		} else mousepressed = Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0);
+
+		static bool firstpass = true;
+		if (firstpass) {
+			if (mousereleased) {
+				firstpass = false;
+				return;
+			}
+		}
+
+		switch (m_CurrentSpell) {
+		case CardID::SMITE:
+			glm::vec2 tr = MouseCoordinates();
+			static LightningCloud* vfx = nullptr;
+			if (vfx == nullptr) {
+				for (int r = 0; r < m_BoardEntities.size(); r++) {
+					for (int c = 0; c < m_BoardEntities.size(); c++) {
+						bool valid = m_BoardEntities[r][c].GetComponent<Flora::TagComponent>().Tag == "D";
+						if (valid) {
+							if (TileCollision(m_BoardEntities[r][c], tr)) {
+								m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.9f, 0.2f, 1.0f };
+								if (mousereleased) {
+									vfx = new LightningCloud(this, m_BoardEntities[r][c]);
+									CleanBoard();
+									return;
+								}
+							} else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
+						} else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
+					}
+				}
+			} else {
+				if (!vfx->Update()) {
+					delete vfx;
+					vfx = nullptr;
+					m_CurrentSpell = CardID::NONE;
+					firstpass = true;
+				}
+			}
+			break;
 		}
 	}
 
