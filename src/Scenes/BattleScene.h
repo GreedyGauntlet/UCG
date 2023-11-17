@@ -3,6 +3,7 @@
 #include "../Utils/BoardUtils.h"
 #include "../Core/Player.h"
 #include "../Core/CardDictionary.h"
+#include "../Monsters/Monster.h"
 
 namespace UCG {
 	enum class BattleState {
@@ -39,6 +40,8 @@ namespace UCG {
 		void CreateUI();
 		void UpdateUI();
 	private:
+		void UpdateMonsters(Flora::Timestep ts);
+	private:
 		void DrawHand();
 		void DrawCard();
 		bool ActivateCard(int cardIndex);
@@ -56,8 +59,12 @@ namespace UCG {
 		bool CheckHovered(Flora::Entity entity);
 		void DevCall();
 	private:
+		template<typename SelectFunction>
+		void SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction);
+	private:
 		std::vector<std::vector<Flora::Entity>> m_BoardEntities;
 		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
+		std::vector<Monster*> m_Monsters;
 		BattleUI m_UI;
 		BattleStats m_Stats;
 		BattleState m_State = BattleState::PREPLAYER;

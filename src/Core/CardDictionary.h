@@ -6,6 +6,7 @@ namespace UCG {
 		NONE = -1,
 		SMITE = 0,
 		GOBLIN = 1,
+		SLIME = 2,
 	};
 
 	struct Card {

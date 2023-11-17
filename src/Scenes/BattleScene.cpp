@@ -2,7 +2,8 @@
 #include "Flora/Core/MouseCodes.h"
 #include "Flora/Core/KeyCodes.h"
 #include "../Utils/SceneUtils.h"
-#include "../VFX/VFX.h"
+#include "../VFX/VFXCore.h"
+#include "../Monsters/MonsterCore.h"
 
 namespace UCG {
 
@@ -19,10 +20,38 @@ namespace UCG {
 
 		{'D', 'D', 'D', 'W', 'D', 'D', 'D', 'F'},
 
-		{'D', 'D', 'D', 'M', 'D', 'D', 'D', 'D'},
+		{'D', 'D', 'D', 'M', 'D', 'D', 'D', 'W'},
 
-		{'O', 'D', 'D', 'D', 'M', 'D', 'D', 'D'},
+		{'O', 'D', 'D', 'D', 'M', 'D', 'W', 'W'},
 	};
+
+	template<typename SelectFunction>
+	void BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc) {
+		glm::vec2 tr = MouseCoordinates();
+		for (int r = 0; r < m_BoardEntities.size(); r++) {
+			for (int c = 0; c < m_BoardEntities.size(); c++) {
+				bool valid = false;
+				for (auto str : enabled_tiles) {
+					if (m_BoardEntities[r][c].GetComponent<Flora::TagComponent>().Tag == str) {
+						valid = true;
+						break;
+					}
+				}
+				if (valid) {
+					if (TileCollision(m_BoardEntities[r][c], tr)) {
+						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.9f, 0.2f, 1.0f };
+						if (trigger) {
+							selectfunc(this, m_BoardEntities[r][c]);
+							CleanBoard();
+							return;
+						}
+					}
+					else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
+				}
+				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
+			}
+		}
+	}
 
 	void BattleScene::Start() {
 		OnRuntimeStart();
@@ -30,6 +59,7 @@ namespace UCG {
 		ResetBoard(test_map);
 		DrawHand();
 		m_Camera = SceneUtils::MainCamera();
+		m_Monsters.clear();
 	}
 
 	void BattleScene::Update(Flora::Timestep ts) {
@@ -40,10 +70,15 @@ namespace UCG {
 		UpdateBattleState();
 		DevCall();
 		UpdateSpell();
+		UpdateMonsters(ts);
 	}
 
 	void BattleScene::Stop() {
 
+	}
+
+	void BattleScene::UpdateMonsters(Flora::Timestep ts) {
+		for (auto& monster : m_Monsters) monster->Update(ts);
 	}
 
 	void BattleScene::ResetBoard(const Board board) {
@@ -318,36 +353,36 @@ namespace UCG {
 			}
 		}
 
+		static LightningCloud* vfx = nullptr;
+
+		#define ENDSPELL() m_CurrentSpell = CardID::NONE; firstpass = true;
 		switch (m_CurrentSpell) {
 		case CardID::SMITE:
-			glm::vec2 tr = MouseCoordinates();
-			static LightningCloud* vfx = nullptr;
 			if (vfx == nullptr) {
-				for (int r = 0; r < m_BoardEntities.size(); r++) {
-					for (int c = 0; c < m_BoardEntities.size(); c++) {
-						bool valid = m_BoardEntities[r][c].GetComponent<Flora::TagComponent>().Tag == "D";
-						if (valid) {
-							if (TileCollision(m_BoardEntities[r][c], tr)) {
-								m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.9f, 0.2f, 1.0f };
-								if (mousereleased) {
-									vfx = new LightningCloud(this, m_BoardEntities[r][c]);
-									CleanBoard();
-									return;
-								}
-							} else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
-						} else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
-					}
-				}
+				SelectTile(mousereleased, {"D"}, [](auto scene_context, auto& tile) {
+					vfx = new LightningCloud(scene_context, tile);
+				});
 			} else {
 				if (!vfx->Update()) {
 					delete vfx;
 					vfx = nullptr;
-					m_CurrentSpell = CardID::NONE;
-					firstpass = true;
+					ENDSPELL();
 				}
 			}
 			break;
+		case CardID::GOBLIN:
+			//TODO
+			break;
+		case CardID::SLIME:
+			SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+				Monster* slime = new Slime();
+				slime->Initialize(scene_context, tile);
+				m_Monsters.push_back(slime);
+				ENDSPELL();
+			});
+			break;
 		}
+		#undef ENDSPELL
 	}
 
 }
