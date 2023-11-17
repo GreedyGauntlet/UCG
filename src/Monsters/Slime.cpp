@@ -8,7 +8,7 @@ namespace UCG {
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		tc.Translation = tile.GetComponent<Flora::TransformComponent>().Translation;
-		tc.Translation.y += 0.5f;
+		tc.Translation.y += 0.75f;
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;

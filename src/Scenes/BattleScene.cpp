@@ -125,14 +125,14 @@ namespace UCG {
 
 		if (translation.x > tiletr.x - 0.5f &&
 			translation.x < tiletr.x + 0.5f &&
-			translation.y > tiletr.y - 0.5f &&
-			translation.y < tiletr.y) {
+			translation.y > tiletr.y - 0.25f &&
+			translation.y < tiletr.y + 0.25f) {
 			float rely = translation.y - tiletr.y;
 			float relx = translation.x - tiletr.x;
-			if (rely > (-0.5f * relx) ||
-				rely > (0.5f * relx) ||
-				rely < (relx * 0.5f - 0.5f) ||
-				rely < (relx * -0.5f - 0.5f)) {
+			if (rely > (-0.5f * relx + 0.25f) ||
+				rely > (0.5f * relx + 0.25f) ||
+				rely < (relx * 0.5f - 0.25f) ||
+				rely < (relx * -0.5f - 0.25f)) {
 				return false;
 			}
 			return true;
