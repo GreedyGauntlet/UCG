@@ -2,7 +2,7 @@
 
 namespace UCG {
 
-	void Slime::Initialize(Flora::Scene* context, Flora::Entity tile) {
+	void Slime::Initialize(GameScene* context, Flora::Entity tile) {
 		m_MaxHealth = m_Health = 3;
 		m_Context = context;
 		m_Body = m_Context->CreateEntity("Slime");
@@ -29,6 +29,7 @@ namespace UCG {
 			src.StartFrame = 8;
 			src.EndFrame = 18;
 		}
+		DrawHealth();
 		DamageAnim(ts);
 	}
 

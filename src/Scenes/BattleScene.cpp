@@ -39,7 +39,7 @@ namespace UCG {
 				}
 				if (valid) {
 					if (TileCollision(m_BoardEntities[r][c], tr)) {
-						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.9f, 0.2f, 1.0f };
+						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
 						if (trigger) {
 							selectfunc(this, m_BoardEntities[r][c]);
 							CleanBoard();

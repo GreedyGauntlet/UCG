@@ -1,12 +1,13 @@
 #pragma once
 #include "Flora.h"
 #include "Flora/Scene/Scene.h"
+#include "../Scenes/GameScene.h"
 
 namespace UCG {
 	class Monster {
 	public:
 		virtual ~Monster() = default;
-		virtual void Initialize(Flora::Scene* context, Flora::Entity tile) = 0;
+		virtual void Initialize(GameScene* context, Flora::Entity tile) = 0;
 		virtual void Update(Flora::Timestep ts) = 0;
 		virtual void Destroy();
 		virtual void Damage(int damage);
@@ -17,8 +18,9 @@ namespace UCG {
 	protected:
 		virtual void DamageAnim(Flora::Timestep ts);
 		virtual void DeathAnim(Flora::Timestep ts);
+		virtual void DrawHealth();
 	protected:
-		Flora::Scene* m_Context;
+		GameScene* m_Context;
 		Flora::Entity m_Body;
 		Flora::Entity m_Tile;
 	protected:
