@@ -399,3 +399,19 @@ namespace UCG {
 	}
 
 }
+
+//NEXT:
+/*
+- no colliding summons
+- redo health, mana, player border
+- enemy border and health/mana
+- meteor card that does what smite does right now, but can burn forests and break mountains
+- change smite to select monsters only
+- cancel spell 
+- moving goblin
+- integrate turns
+- if needles done:
+	- implement needles
+- else:
+	- just start creating cards and tuning up UI
+*/
