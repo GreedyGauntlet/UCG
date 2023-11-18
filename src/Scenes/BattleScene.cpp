@@ -78,6 +78,12 @@ namespace UCG {
 	}
 
 	void BattleScene::UpdateMonsters(Flora::Timestep ts) {
+		for (int i = 0; i < m_Monsters.size(); i++) {
+			if (!m_Monsters[i]->Alive()) {
+				delete m_Monsters[i];
+				m_Monsters.erase(m_Monsters.begin() + i);
+			}
+		}
 		for (auto& monster : m_Monsters) monster->Update(ts);
 	}
 
@@ -197,10 +203,11 @@ namespace UCG {
 		// card activation
 		if (m_SelectedCard >= 0) {
 			Flora::Entity card = m_Hand[m_SelectedCard].first;
-			if (card.GetComponent<Flora::TransformComponent>().Translation.y > -1.0f)
+			if (card.GetComponent<Flora::TransformComponent>().Translation.y > -1.0f) {
 				card.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
-			if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0))
-				ActivateCard(m_SelectedCard);
+				if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0))
+					ActivateCard(m_SelectedCard);
+			}
 		}
 
 		// card dragging
@@ -346,7 +353,7 @@ namespace UCG {
 		} else mousepressed = Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0);
 
 		static bool firstpass = true;
-		if (firstpass) {
+		if (firstpass && m_CurrentSpell != CardID::NONE) {
 			if (mousereleased) {
 				firstpass = false;
 				return;
@@ -363,6 +370,11 @@ namespace UCG {
 					vfx = new LightningCloud(scene_context, tile);
 				});
 			} else {
+				if (vfx->Activate()) {
+					for (auto monster : m_Monsters)
+						if (monster->Tile() == vfx->Tile())
+							monster->Damage(1);
+				}
 				if (!vfx->Update()) {
 					delete vfx;
 					vfx = nullptr;
@@ -372,6 +384,7 @@ namespace UCG {
 			break;
 		case CardID::GOBLIN:
 			//TODO
+			ENDSPELL();
 			break;
 		case CardID::SLIME:
 			SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {

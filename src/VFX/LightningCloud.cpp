@@ -4,6 +4,7 @@ namespace UCG {
 
 	LightningCloud::LightningCloud(BattleScene* scene, Flora::Entity tile) {
 		m_VFX = scene->CreateEntity("VFX Lightning");
+		m_Tile = tile;
 		m_Scene = scene;
 		Flora::SpriteRendererComponent& src = m_VFX.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& tc = m_VFX.GetComponent<Flora::TransformComponent>();
@@ -27,6 +28,14 @@ namespace UCG {
 			return false;
 		}
 		return true;
+	}
+
+	bool LightningCloud::Activate() {
+		if (m_VFX.GetComponent<Flora::SpriteRendererComponent>().CurrentFrame >= 7 && !m_Active) {
+			m_Active = true;
+			return true;
+		}
+		return false;
 	}
 
 }

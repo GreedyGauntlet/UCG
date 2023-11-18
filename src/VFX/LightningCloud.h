@@ -9,9 +9,13 @@ namespace UCG {
 	class LightningCloud {
 	public:
 		LightningCloud(BattleScene*, Flora::Entity tile);
+		Flora::Entity Tile() { return m_Tile; }
 		bool Update();
+		bool Activate();
 	private:
 		Flora::Entity m_VFX;
+		Flora::Entity m_Tile;
 		BattleScene* m_Scene;
+		bool m_Active = false;
 	};
 }
