@@ -27,7 +27,7 @@ namespace UCG {
 	};
 
 	struct BattleStats {
-		int PlayerHealth = 10;
+		int PlayerHealth = 20;
 		int PlayerMana = 28;
 	};
 
@@ -60,7 +60,7 @@ namespace UCG {
 		void DevCall();
 	private:
 		template<typename SelectFunction>
-		void SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction);
+		void SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction, bool occupied_enabled = true);
 	private:
 		std::vector<std::vector<Flora::Entity>> m_BoardEntities;
 		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
@@ -70,5 +70,8 @@ namespace UCG {
 		BattleState m_State = BattleState::PREPLAYER;
 		int m_SelectedCard = -1;
 		CardID m_CurrentSpell = CardID::NONE;
+	private:
+		Flora::Entity m_PlayerNexus;
+		Flora::Entity m_OpponentNexus;
 	};
 }

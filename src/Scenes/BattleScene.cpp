@@ -1,6 +1,8 @@
 #include "BattleScene.h"
 #include "Flora/Core/MouseCodes.h"
 #include "Flora/Core/KeyCodes.h"
+#include "Flora/Renderer/Renderer2D.h"
+#include "Flora/Math/Math.h"
 #include "../Utils/SceneUtils.h"
 #include "../VFX/VFXCore.h"
 #include "../Monsters/MonsterCore.h"
@@ -26,7 +28,7 @@ namespace UCG {
 	};
 
 	template<typename SelectFunction>
-	void BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc) {
+	void BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc, bool occupied_enabled) {
 		glm::vec2 tr = MouseCoordinates();
 		for (int r = 0; r < m_BoardEntities.size(); r++) {
 			for (int c = 0; c < m_BoardEntities.size(); c++) {
@@ -37,6 +39,12 @@ namespace UCG {
 						break;
 					}
 				}
+				if (valid && !occupied_enabled)
+					for (auto monster : m_Monsters)
+						if (monster->Tile() == m_BoardEntities[r][c]) {
+							valid = false;
+							break;
+						}
 				if (valid) {
 					if (TileCollision(m_BoardEntities[r][c], tr)) {
 						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
@@ -102,6 +110,8 @@ namespace UCG {
 				tile.GetComponent<Flora::SpriteRendererComponent>().Path = BoardUtils::TilePath(board[r][c]);
 				tile.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
+				if (board[r][c] == 'P') m_PlayerNexus = tile;
+				else if (board[r][c] == 'O') m_OpponentNexus = tile;
 			}
 			m_BoardEntities.push_back(row);
 		}
@@ -321,6 +331,7 @@ namespace UCG {
 	}
 
 	void BattleScene::UpdateUI() {
+		//temp
 		for (int i = 0; i < m_UI.PUI.Mana.size(); i++) {
 			Flora::Entity mana = m_UI.PUI.Mana[i];
 			if (i + 1 > m_Stats.PlayerMana) {
@@ -331,6 +342,27 @@ namespace UCG {
 			}
 			mana.GetComponent<Flora::TransformComponent>().Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.28f * (i + 1) + 0.4f, 0.0f, 0.0f);
 		}
+
+		// Custom UI
+		Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
+		if (false) { //TODO LATER
+			// Player Health
+			Flora::TransformComponent player_transform = m_PlayerNexus.GetComponent<Flora::TransformComponent>();
+			for (int i = 0; i < m_Stats.PlayerHealth; i++) {
+				glm::vec3 translation = player_transform.Translation + glm::vec3(0.6f, i * 0.1f, 0.0f);
+				glm::vec3 scale = { 0.1f, 0.05f, 1.0f };
+				glm::vec4 color = {0.0f, 1.0f, 0.0f, 1.0f};
+				Flora::Renderer2D::DrawQuad(
+					Flora::Math::ComposeTransform(
+						translation,
+						glm::vec3(0.0f),
+						scale
+					),
+					color
+				);
+			}
+		}
+		Flora::Renderer2D::EndScene();
 	}
 
 	void BattleScene::CleanBoard() {
@@ -360,14 +392,15 @@ namespace UCG {
 			}
 		}
 
-		static LightningCloud* vfx = nullptr;
+		static VFX* vfx = nullptr;
 
 		#define ENDSPELL() m_CurrentSpell = CardID::NONE; firstpass = true;
 		switch (m_CurrentSpell) {
 		case CardID::SMITE:
 			if (vfx == nullptr) {
 				SelectTile(mousereleased, {"D"}, [](auto scene_context, auto& tile) {
-					vfx = new LightningCloud(scene_context, tile);
+					vfx = new LightningCloud();
+					vfx->Initialize(scene_context, tile);
 				});
 			} else {
 				if (vfx->Activate()) {
@@ -392,7 +425,27 @@ namespace UCG {
 				slime->Initialize(scene_context, tile);
 				m_Monsters.push_back(slime);
 				ENDSPELL();
-			});
+			}, false);
+			break;
+		case CardID::METEOR:
+			if (vfx == nullptr) {
+				SelectTile(mousereleased, { "D" }, [](auto scene_context, auto& tile) {
+					vfx = new Meteor();
+					vfx->Initialize(scene_context, tile);
+					});
+			}
+			else {
+				if (vfx->Activate()) {
+					for (auto monster : m_Monsters)
+						if (monster->Tile() == vfx->Tile())
+							monster->Damage(3);
+				}
+				if (!vfx->Update()) {
+					delete vfx;
+					vfx = nullptr;
+					ENDSPELL();
+				}
+			}
 			break;
 		}
 		#undef ENDSPELL
@@ -402,16 +455,17 @@ namespace UCG {
 
 //NEXT:
 /*
-- no colliding summons
-- redo health, mana, player border
-- enemy border and health/mana
 - meteor card that does what smite does right now, but can burn forests and break mountains
 - change smite to select monsters only
 - cancel spell 
 - moving goblin
+- integrate monsters killing nexus (nexus is technically a monster object!)
+- redo health, mana, player border
+- enemy border and health/mana
 - integrate turns
 - if needles done:
 	- implement needles
+	- implem,ent multiplayer Ui
 - else:
 	- just start creating cards and tuning up UI
 */

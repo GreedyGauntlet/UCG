@@ -21,6 +21,11 @@ namespace UCG {
 			card.Name = "Slime";
 			card.Description = "Summons a slime with 3 health and 0 attack that does nothing. However, this slime will revive up to 5 times upon death after 2 turns.";
 			break;
+		case CardID::METEOR:
+			card.Cost = 5;
+			card.Name = "Meteor";
+			card.Description = "Summons a destructive metor that can even damage the terrain. Does 5 damage to monsters and 1 damage to terrain.";
+			break;
 		}
 		return card;
 	}

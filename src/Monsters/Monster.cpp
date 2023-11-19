@@ -44,7 +44,7 @@ namespace UCG {
 	void Monster::DrawHealth() {
 		bool hovered = false;
 		if (m_Context->HoveredEntity())
-			if (*m_Context->HoveredEntity() == m_Tile) hovered = true;
+			if (*m_Context->HoveredEntity() == m_Tile || *m_Context->HoveredEntity() == m_Body) hovered = true;
 		if ((m_Health != m_MaxHealth || hovered) && m_Health > 0) {
 			glm::vec3 translation = m_Body.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.0f, -0.9f, 0.1f);
 			Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
