@@ -18,8 +18,8 @@ namespace UCG {
 	struct PlayerUI {
 		Flora::Entity ProfileBorder;
 		Flora::Entity ProfilePicture;
-		std::vector<Flora::Entity> Health;
-		std::vector<Flora::Entity> Mana;
+		std::vector<Flora::Entity> ManaVessel;
+		std::vector<Flora::Entity> HealthVessel;
 	};
 
 	struct BattleUI {
@@ -45,6 +45,7 @@ namespace UCG {
 		void DrawHand();
 		void DrawCard();
 		bool ActivateCard(int cardIndex);
+		void ConsumeCard();
 		void UpdateHand(Flora::Timestep ts, bool fast = false);
 		void UpdateSpell();
 	private:
@@ -60,7 +61,7 @@ namespace UCG {
 		void DevCall();
 	private:
 		template<typename SelectFunction>
-		void SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction, bool occupied_enabled = true);
+		bool SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction, bool occupied_enabled = true, bool occupied_override = false);
 	private:
 		std::vector<std::vector<Flora::Entity>> m_BoardEntities;
 		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
@@ -70,6 +71,7 @@ namespace UCG {
 		BattleState m_State = BattleState::PREPLAYER;
 		int m_SelectedCard = -1;
 		CardID m_CurrentSpell = CardID::NONE;
+		int m_CurrentSpellCardIndex = -1;
 	private:
 		Flora::Entity m_PlayerNexus;
 		Flora::Entity m_OpponentNexus;

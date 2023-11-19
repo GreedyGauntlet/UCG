@@ -28,7 +28,7 @@ namespace UCG {
 	};
 
 	template<typename SelectFunction>
-	void BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc, bool occupied_enabled) {
+	bool BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc, bool occupied_enabled, bool occupied_override) {
 		glm::vec2 tr = MouseCoordinates();
 		for (int r = 0; r < m_BoardEntities.size(); r++) {
 			for (int c = 0; c < m_BoardEntities.size(); c++) {
@@ -45,13 +45,20 @@ namespace UCG {
 							valid = false;
 							break;
 						}
+				if (!valid && occupied_override) {
+					for (auto monster : m_Monsters)
+						if (monster->Tile() == m_BoardEntities[r][c]) {
+							valid = true;
+							break;
+						}
+				}
 				if (valid) {
 					if (TileCollision(m_BoardEntities[r][c], tr)) {
 						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
 						if (trigger) {
 							selectfunc(this, m_BoardEntities[r][c]);
 							CleanBoard();
-							return;
+							return true;
 						}
 					}
 					else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
@@ -59,6 +66,8 @@ namespace UCG {
 				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
 			}
 		}
+		if (trigger) return false;
+		return true;
 	}
 
 	void BattleScene::Start() {
@@ -74,11 +83,11 @@ namespace UCG {
 		GenericUpdate(ts);
 		UpdateBoard();
 		UpdateHand(ts);
-		UpdateUI();
 		UpdateBattleState();
 		DevCall();
 		UpdateSpell();
 		UpdateMonsters(ts);
+		UpdateUI();
 	}
 
 	void BattleScene::Stop() {
@@ -177,6 +186,10 @@ namespace UCG {
 				dest_rt = glm::vec3(0.0f);
 				dest_tr = { MouseCoordinates().x, MouseCoordinates().y, m_Hand.size() * 0.01f + origin.z };
 			}
+			if (m_CurrentSpellCardIndex == i) {
+				dest_rt = glm::vec3(0.0f);
+				dest_tr = { 5.0f, 0.0f, 1.0f };
+			}
 			if (fast) {
 				tc.Translation = dest_tr;
 				tc.Rotation = dest_rt;
@@ -211,7 +224,7 @@ namespace UCG {
 		}
 
 		// card activation
-		if (m_SelectedCard >= 0) {
+		if (m_SelectedCard >= 0 && m_CurrentSpellCardIndex < 0) {
 			Flora::Entity card = m_Hand[m_SelectedCard].first;
 			if (card.GetComponent<Flora::TransformComponent>().Translation.y > -1.0f) {
 				card.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
@@ -222,7 +235,7 @@ namespace UCG {
 
 		// card dragging
 		if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0)) m_SelectedCard = -1;
-		else if (m_SelectedCard < 0)
+		else if (m_SelectedCard < 0 && m_CurrentSpellCardIndex < 0)
 			if (HoveredEntity())
 				for (int i = 0; i < m_Hand.size(); i++)
 					if (CheckHovered(m_Hand[i].first))
@@ -238,20 +251,70 @@ namespace UCG {
 		m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation = { -5.2f, 2.65f, 998.0f };
 		m_UI.PUI.ProfilePicture.GetComponent<Flora::TransformComponent>().Translation = { -5.2f, 2.65f, 998.1f };
 
+		// health vessel top/bottm
+		Flora::Entity health_vessel_top = CreateEntity("Health Vessel Top");
+		Flora::Entity health_vessel_bot = CreateEntity("Health Vessel Bottom");
+		Flora::SpriteRendererComponent& h_top_src = health_vessel_top.AddComponent<Flora::SpriteRendererComponent>();
+		Flora::TransformComponent& h_top_tc = health_vessel_top.GetComponent<Flora::TransformComponent>();
+		Flora::SpriteRendererComponent& h_bot_src = health_vessel_bot.AddComponent<Flora::SpriteRendererComponent>();
+		Flora::TransformComponent& h_bot_tc = health_vessel_bot.GetComponent<Flora::TransformComponent>();
+		h_top_src.Path = h_bot_src.Path = "assets/UI/Battle/Health Vessel.png";
+		h_top_src.Type = h_bot_src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
+		h_top_src.Columns = h_bot_src.Columns = 1;
+		h_top_src.Rows = h_bot_src.Rows = 4;
+		h_top_src.ColumnCoordinate = h_bot_src.ColumnCoordinate = 1;
+		h_top_src.RowCoordinate = 1;
+		h_bot_src.RowCoordinate = 4;
+		h_top_tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(-0.25f, (-0.7f) - (-1.0f * 0.125f), 0.0f);
+		h_bot_tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(-0.25f, (-0.7f) - (m_Stats.PlayerHealth * 0.125f), 0.0f);
+		h_top_tc.Scale = h_bot_tc.Scale = { 0.5f, 0.125f, 1.0f };
+
+		// mana vessel top/bottm
+		Flora::Entity mana_vessel_top = CreateEntity("Mana Vessel Top");
+		Flora::Entity mana_vessel_bot = CreateEntity("Mana Vessel Bottom");
+		Flora::SpriteRendererComponent& m_top_src = mana_vessel_top.AddComponent<Flora::SpriteRendererComponent>();
+		Flora::TransformComponent& m_top_tc = mana_vessel_top.GetComponent<Flora::TransformComponent>();
+		Flora::SpriteRendererComponent& m_bot_src = mana_vessel_bot.AddComponent<Flora::SpriteRendererComponent>();
+		Flora::TransformComponent& m_bot_tc = mana_vessel_bot.GetComponent<Flora::TransformComponent>();
+		m_top_src.Path = m_bot_src.Path = "assets/UI/Battle/Mana Vessel.png";
+		m_top_src.Type = m_bot_src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
+		m_top_src.Columns = m_bot_src.Columns = 1;
+		m_top_src.Rows = m_bot_src.Rows = 4;
+		m_top_src.ColumnCoordinate = m_bot_src.ColumnCoordinate = 1;
+		m_top_src.RowCoordinate = 1;
+		m_bot_src.RowCoordinate = 4;
+		m_top_tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.25f, (-0.7f) - (-1.0f * 0.125f), 0.0f);
+		m_bot_tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.25f, (-0.7f) - (m_Stats.PlayerMana * 0.125f), 0.0f);
+		m_top_tc.Scale = m_bot_tc.Scale = { 0.5f, 0.125f, 1.0f };
+
 		for (int i = 0; i < m_Stats.PlayerHealth; i++) {
-			Flora::Entity heart = CreateEntity("Health Container");
-			heart.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/UI/Battle/Heart.png";
-			heart.GetComponent<Flora::TransformComponent>().Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.25f * (i + 1) + 0.3f, 0.3f, 0.0f);
-			heart.GetComponent<Flora::TransformComponent>().Scale = { 0.5f, 0.5f, 1.0f };
-			m_UI.PUI.Health.push_back(heart);
+			Flora::Entity vessel = CreateEntity("Health Vessel");
+			Flora::SpriteRendererComponent& src = vessel.AddComponent<Flora::SpriteRendererComponent>();
+			Flora::TransformComponent& tc = vessel.GetComponent<Flora::TransformComponent>();
+			src.Path = "assets/UI/Battle/Health Vessel.png";
+			src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
+			src.Columns = 1;
+			src.Rows = 4;
+			src.ColumnCoordinate = 1;
+			src.RowCoordinate = 2;
+			tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(-0.25f, (-0.7f) - (i * 0.125f), 0.0f);
+			tc.Scale = { 0.5f, 0.125f, 1.0f };
+			m_UI.PUI.HealthVessel.push_back(vessel);
 		}
 
 		for (int i = 0; i < m_Stats.PlayerMana; i++) {
-			Flora::Entity mana = CreateEntity("Mana Container");
-			mana.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/UI/Battle/Mana.png";
-			mana.GetComponent<Flora::TransformComponent>().Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.28f * (i + 1) + 0.4f, 0.0f, 0.0f);
-			mana.GetComponent<Flora::TransformComponent>().Scale = { 0.5f, 0.5f, 1.0f };
-			m_UI.PUI.Mana.push_back(mana);
+			Flora::Entity vessel = CreateEntity("Mana Vessel");
+			Flora::SpriteRendererComponent& src = vessel.AddComponent<Flora::SpriteRendererComponent>();
+			Flora::TransformComponent& tc = vessel.GetComponent<Flora::TransformComponent>();
+			src.Path = "assets/UI/Battle/Mana Vessel.png";
+			src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
+			src.Columns = 1;
+			src.Rows = 4;
+			src.ColumnCoordinate = 1;
+			src.RowCoordinate = 2;
+			tc.Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.25f, (-0.7f) - (i * 0.125f), 0.0f);
+			tc.Scale = { 0.5f, 0.125f, 1.0f };
+			m_UI.PUI.ManaVessel.push_back(vessel);
 		}
 	}
 
@@ -317,52 +380,34 @@ namespace UCG {
 	}
 
 	bool BattleScene::ActivateCard(int cardIndex) {
-		Flora::Entity card = m_Hand[cardIndex].first;
 		Card info = m_Hand[cardIndex].second;
-
 		if (m_Stats.PlayerMana >= info.Cost) {
-			m_Stats.PlayerMana -= info.Cost;
 			m_CurrentSpell = info.ID;
-			m_Hand.erase(m_Hand.begin() + cardIndex);
-			DestroyEntity(card);
+			m_CurrentSpellCardIndex = cardIndex;
 			return true;
 		}
 		return false;
 	}
 
+	void BattleScene::ConsumeCard() {
+		Flora::Entity card = m_Hand[m_CurrentSpellCardIndex].first;
+		Card info = m_Hand[m_CurrentSpellCardIndex].second;
+		m_Stats.PlayerMana -= info.Cost;
+		m_Hand.erase(m_Hand.begin() + m_CurrentSpellCardIndex);
+		m_CurrentSpellCardIndex = -1;
+		DestroyEntity(card);
+	}
+
 	void BattleScene::UpdateUI() {
-		//temp
-		for (int i = 0; i < m_UI.PUI.Mana.size(); i++) {
-			Flora::Entity mana = m_UI.PUI.Mana[i];
-			if (i + 1 > m_Stats.PlayerMana) {
-				m_UI.PUI.Mana.erase(m_UI.PUI.Mana.begin() + i);
-				DestroyEntity(mana);
-				i--;
-				continue;
-			}
-			mana.GetComponent<Flora::TransformComponent>().Translation = m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.28f * (i + 1) + 0.4f, 0.0f, 0.0f);
+		// Player Health
+		for (int i = 0; i < m_UI.PUI.HealthVessel.size(); i++) {
+			m_UI.PUI.HealthVessel[m_UI.PUI.HealthVessel.size() - 1 - i].GetComponent<Flora::SpriteRendererComponent>().RowCoordinate = (i + 1) <= m_Stats.PlayerHealth ? 3 : 2;
 		}
 
-		// Custom UI
-		Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
-		if (false) { //TODO LATER
-			// Player Health
-			Flora::TransformComponent player_transform = m_PlayerNexus.GetComponent<Flora::TransformComponent>();
-			for (int i = 0; i < m_Stats.PlayerHealth; i++) {
-				glm::vec3 translation = player_transform.Translation + glm::vec3(0.6f, i * 0.1f, 0.0f);
-				glm::vec3 scale = { 0.1f, 0.05f, 1.0f };
-				glm::vec4 color = {0.0f, 1.0f, 0.0f, 1.0f};
-				Flora::Renderer2D::DrawQuad(
-					Flora::Math::ComposeTransform(
-						translation,
-						glm::vec3(0.0f),
-						scale
-					),
-					color
-				);
-			}
+		// Player Mana
+		for (int i = 0; i < m_UI.PUI.ManaVessel.size(); i++) {
+			m_UI.PUI.ManaVessel[m_UI.PUI.ManaVessel.size() - 1 - i].GetComponent<Flora::SpriteRendererComponent>().RowCoordinate = (i + 1) <= m_Stats.PlayerMana ? 3 : 2;
 		}
-		Flora::Renderer2D::EndScene();
 	}
 
 	void BattleScene::CleanBoard() {
@@ -394,14 +439,15 @@ namespace UCG {
 
 		static VFX* vfx = nullptr;
 
-		#define ENDSPELL() m_CurrentSpell = CardID::NONE; firstpass = true;
+		#define ENDSPELL() {m_CurrentSpell = CardID::NONE; firstpass = true; m_CurrentSpellCardIndex = -1; CleanBoard();}
 		switch (m_CurrentSpell) {
 		case CardID::SMITE:
 			if (vfx == nullptr) {
-				SelectTile(mousereleased, {"D"}, [](auto scene_context, auto& tile) {
+				if (!SelectTile(mousereleased, {}, [this](auto scene_context, auto& tile) {
 					vfx = new LightningCloud();
 					vfx->Initialize(scene_context, tile);
-				});
+					ConsumeCard();
+				}, true, true)) ENDSPELL();
 			} else {
 				if (vfx->Activate()) {
 					for (auto monster : m_Monsters)
@@ -420,19 +466,21 @@ namespace UCG {
 			ENDSPELL();
 			break;
 		case CardID::SLIME:
-			SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+			if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
 				Monster* slime = new Slime();
 				slime->Initialize(scene_context, tile);
 				m_Monsters.push_back(slime);
+				ConsumeCard();
 				ENDSPELL();
-			}, false);
+			}, false)) ENDSPELL();
 			break;
 		case CardID::METEOR:
 			if (vfx == nullptr) {
-				SelectTile(mousereleased, { "D" }, [](auto scene_context, auto& tile) {
+				if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
 					vfx = new Meteor();
 					vfx->Initialize(scene_context, tile);
-					});
+					ConsumeCard();
+				})) ENDSPELL();
 			}
 			else {
 				if (vfx->Activate()) {
@@ -455,10 +503,9 @@ namespace UCG {
 
 //NEXT:
 /*
-- meteor card that does what smite does right now, but can burn forests and break mountains
-- change smite to select monsters only
-- cancel spell 
+- spawn only around nexus
 - moving goblin
+- meteor card that does what smite does right now, but can burn forests and break mountains
 - integrate monsters killing nexus (nexus is technically a monster object!)
 - redo health, mana, player border
 - enemy border and health/mana
