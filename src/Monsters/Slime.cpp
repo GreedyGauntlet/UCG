@@ -3,7 +3,7 @@
 namespace UCG {
 
 	void Slime::Initialize(GameScene* context, Flora::Entity tile) {
-		m_MaxHealth = m_Health = 8;
+		m_Status.MaxHealth = m_Status.Health = 3;
 		m_Context = context;
 		m_Body = m_Context->CreateEntity("Slime");
 		m_Tile = tile;

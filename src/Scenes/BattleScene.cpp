@@ -462,8 +462,13 @@ namespace UCG {
 			}
 			break;
 		case CardID::GOBLIN:
-			//TODO
-			ENDSPELL();
+			if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+				Monster* goblin = new Goblin();
+				goblin->Initialize(scene_context, tile);
+				m_Monsters.push_back(goblin);
+				ConsumeCard();
+				ENDSPELL();
+			}, false)) ENDSPELL();
 			break;
 		case CardID::SLIME:
 			if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
@@ -503,9 +508,9 @@ namespace UCG {
 
 //NEXT:
 /*
-- spawn only around nexus
 - moving goblin
-- meteor card that does what smite does right now, but can burn forests and break mountains
+- spawn only around nexus
+- meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
 - integrate monsters killing nexus (nexus is technically a monster object!)
 - redo health, mana, player border
 - enemy border and health/mana

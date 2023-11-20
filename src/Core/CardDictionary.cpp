@@ -12,12 +12,12 @@ namespace UCG {
 			card.Description = "Deals 1 damage to any tile";
 			break;
 		case CardID::GOBLIN:
-			card.Cost = 1;
+			card.Cost = 3;
 			card.Name = "Goblin";
-			card.Description = "Summons a goblin with 1 health and does 1 damage to any adjacent tiles. Roams randomly 1 tile every other turn.";
+			card.Description = "Summons an aggressive goblin with 5 health and 1 melee damage to any adjacent tiles. Roams randomly 1 tile every other turn.";
 			break;
 		case CardID::SLIME:
-			card.Cost = 3;
+			card.Cost = 1;
 			card.Name = "Slime";
 			card.Description = "Summons a slime with 3 health and 0 attack that does nothing. However, this slime will revive up to 5 times upon death after 2 turns.";
 			break;
