@@ -19,7 +19,7 @@ namespace UCG {
 		m_Framebuffer->Bind();
 		Flora::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Flora::RenderCommand::Clear();
-		RenderRuntime(ts, m_Camera->GetProjection());
+		RenderRuntime(Flora::Timestep(ts/2.0f), m_Camera->GetProjection());
 
 		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, Flora::Input::GetMouseX(), 900 - Flora::Input::GetMouseY());
 
@@ -30,7 +30,7 @@ namespace UCG {
 		
 
 
-		OnUpdateRuntime(ts, m_Camera->GetProjection()); 
+		OnUpdateRuntime(Flora::Timestep(ts / 2.0f), m_Camera->GetProjection());
 		// NOTE: is doing this last going to make the framebuffer lag behind the update? 
 		//       (i dont think so, in the generic update call entities are rendered first)
 	}

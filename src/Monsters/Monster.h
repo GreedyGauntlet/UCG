@@ -13,6 +13,7 @@ namespace UCG {
 	};
 
 	enum class AnimationState {
+		INVALID,
 		SPAWN,
 		DEATH,
 		IDLE,
@@ -26,13 +27,14 @@ namespace UCG {
 
 	struct AnimationQueue {
 		std::vector<AnimationCommand> Queue;
-		AnimationCommand CurrentAnimation = { AnimationState::SPAWN, Orientation::NONE };
+		AnimationCommand CurrentAnimation = { AnimationState::INVALID, Orientation::NONE };
 		float AnimationTime = 0.0f;
 	};
 
 	struct AnimationMap {
 		Animation Spawn        = { 0, 0, 0 }; // spawn in (default facing DL)
-		Animation Death        = { 0, 0, 0 }; // death (default facing DL)
+		Animation DeathDown    = { 0, 0, 0 }; // death (default facing DL)
+		Animation DeathUp      = { 0, 0, 0 }; // death (default facing UL)
 		Animation IdleDown     = { 0, 0, 0 }; // idle (default facing DL)
 		Animation IdleUp       = { 0, 0, 0 }; // idle (default facing UL)
 		Animation AttackUp     = { 0, 0, 0 }; // attack (default facing UL)
@@ -41,8 +43,8 @@ namespace UCG {
 		Animation MoveDown     = { 0, 0, 0 }; // move (center to DL)
 		Animation RotateUp     = { 0, 0, 0 }; // rotate (DL to UL)
 		Animation RotateDown   = { 0, 0, 0 }; // rotate (UL to DL)
-		Animation RotateTop    = { 0, 0, 0 }; // rotate (UL to UR)
-		Animation RotateBottom = { 0, 0, 0 }; // rotate (DL to DR)
+		Animation RotateTop    = { 0, 0, 0 }; // rotate (UR to UL)
+		Animation RotateBottom = { 0, 0, 0 }; // rotate (DR to DL)
 	};
 
 	struct MonsterStatus {
@@ -73,6 +75,8 @@ namespace UCG {
 		virtual void QueueAnimation(AnimationCommand command);
 		virtual void OverrideAnimation(AnimationCommand command);
 		virtual void UpdateAnimation(Flora::Timestep ts);
+		virtual Animation GetAnimation(AnimationCommand command);
+		virtual float GetAnimationTime(Animation anim);
 	protected:
 		GameScene* m_Context;
 		Flora::Entity m_Body;

@@ -16,31 +16,30 @@ namespace UCG {
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;
 		src.Path = "assets/Monsters/Goblin.png";
 		src.Frames = 42;
-		src.StartFrame = 8;
-		src.EndFrame = 14;
-		src.FPS = 5;
 		src.Rows = 1;
 		src.Columns = 42;
+		
+		m_Animations.IdleDown = { 22, 28, 10 };
+		m_Animations.IdleUp = { 29, 35, 10 };
+		m_Animations.Spawn = { 8, 14, 10 };
+		m_Animations.DeathDown = { 1, 7, 10 };
+
+		QueueAnimation({AnimationState::SPAWN, Orientation::NONE});
+		QueueAnimation({AnimationState::IDLE, Orientation::DL});
 	}
 
 	void Goblin::Update(Flora::Timestep ts) {
-		Flora::SpriteRendererComponent& src = m_Body.GetComponent<Flora::SpriteRendererComponent>();
-		if (src.CurrentFrame >= 14 && src.StartFrame == 8) {
-			src.StartFrame = 22;
-			src.EndFrame = 28;
-		}
 		DrawHealth();
 		DamageAnim(ts);
+		UpdateAnimation(ts);
 	}
 
 	void Goblin::DeathAnim(Flora::Timestep ts) {
-		Flora::SpriteRendererComponent& src = m_Body.GetComponent<Flora::SpriteRendererComponent>();
-		src.StartFrame = 1;
-		src.EndFrame = 7;
-		src.FPS = 5;
-		if (src.CurrentFrame >= 7) {
+		if (std::get<0>(m_AnimationQueue.CurrentAnimation) != AnimationState::DEATH)
+			OverrideAnimation({AnimationState::DEATH, Orientation::DL});
+
+		if (m_AnimationQueue.AnimationTime > GetAnimationTime(m_Animations.DeathDown))
 			Destroy();
-		}
 	}
 
 }

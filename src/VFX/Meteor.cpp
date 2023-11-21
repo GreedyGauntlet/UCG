@@ -16,7 +16,7 @@ namespace UCG {
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;
 		src.Rows = 1;
 		src.Columns = 28;
-		src.FPS = 10;
+		src.FPS = 20;
 		src.Frames = 28;
 		src.StartFrame = 1;
 		src.EndFrame = 28;
