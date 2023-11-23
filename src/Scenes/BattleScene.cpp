@@ -83,7 +83,7 @@ namespace UCG {
 		GenericUpdate(ts);
 		UpdateBoard();
 		UpdateHand(ts);
-		UpdateBattleState();
+		UpdateBattleState(ts);
 		DevCall();
 		UpdateSpell();
 		UpdateMonsters(ts);
@@ -318,13 +318,34 @@ namespace UCG {
 		}
 	}
 
-	void BattleScene::UpdateBattleState() {
+	void BattleScene::UpdateBattleState(Flora::Timestep ts) {
+		bool fieldaction = false;
+
 		switch (m_State) {
 		case BattleState::PREPLAYER:
 			DrawCard();
 			m_State = BattleState::PLAYER;
 			break;
 		case BattleState::PLAYER:
+			break;
+		case BattleState::ENDPLAYER:
+			for (auto monster : m_Monsters)
+				monster->StartTurn();
+			m_State = BattleState::POSTPLAYER;
+			break;
+		case BattleState::POSTPLAYER:
+			fieldaction = false;
+			for (auto monster : m_Monsters) {
+				if (monster->InAction()) {
+					fieldaction = true;
+					monster->UpdateActions(ts);
+					break;
+				}
+			}
+			if (!fieldaction) m_State = BattleState::PREOPPONENT;
+			break;
+		case BattleState::PREOPPONENT:
+			m_State = BattleState::PREPLAYER;
 			break;
 		}
 	}
@@ -355,10 +376,23 @@ namespace UCG {
 	}
 
 	void BattleScene::DevCall() {
+		if (false) {
+			if (HoveredEntity()) {
+				for (int r = 0; r < m_BoardEntities.size(); r++)
+					for (int c = 0; c < m_BoardEntities[0].size(); c++)
+						if (*HoveredEntity() == m_BoardEntities[r][c])
+							FL_CORE_INFO("r: {}, c: {}", r, c);
+			}
+		}
 		static bool d_down = Flora::Input::IsKeyPressed(Flora::Key::D);
 		if (d_down) {
 			if (!Flora::Input::IsKeyPressed(Flora::Key::D)) {
-				DrawCard();
+				if (Flora::Input::IsKeyPressed(Flora::Key::T)) {
+					m_State = BattleState::ENDPLAYER;
+				}
+				else {
+					DrawCard();
+				}
 				d_down = false;
 			} 
 		}

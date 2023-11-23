@@ -6,7 +6,7 @@ namespace UCG {
 		m_Status.MaxHealth = m_Status.Health = 5;
 		m_Context = context;
 		m_Body = m_Context->CreateEntity("Goblin");
-		m_Tile = tile;
+		m_Tile = GetTileRef(tile);
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		tc.Translation = tile.GetComponent<Flora::TransformComponent>().Translation;
@@ -28,18 +28,10 @@ namespace UCG {
 		QueueAnimation({AnimationState::IDLE, Orientation::DL});
 	}
 
-	void Goblin::Update(Flora::Timestep ts) {
-		DrawHealth();
-		DamageAnim(ts);
-		UpdateAnimation(ts);
-	}
-
-	void Goblin::DeathAnim(Flora::Timestep ts) {
-		if (std::get<0>(m_AnimationQueue.CurrentAnimation) != AnimationState::DEATH)
-			OverrideAnimation({AnimationState::DEATH, Orientation::DL});
-
-		if (m_AnimationQueue.AnimationTime > GetAnimationTime(m_Animations.DeathDown))
-			Destroy();
+	void Goblin::StartTurn() {
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::IDLE);
 	}
 
 }

@@ -2,6 +2,7 @@
 #include "Flora/Math/Math.h"
 #include "../Utils/SceneUtils.h"
 #include "Flora/Renderer/Renderer2D.h"
+#include "../Scenes/BattleScene.h"
 
 namespace UCG {
 
@@ -39,13 +40,17 @@ namespace UCG {
 	}
 
 	void Monster::DeathAnim(Flora::Timestep ts) {
-		Destroy();
+		if (std::get<0>(m_AnimationQueue.CurrentAnimation) != AnimationState::DEATH)
+			OverrideAnimation({ AnimationState::DEATH, m_Status.Orientation });
+
+		if (m_AnimationQueue.AnimationTime > GetAnimationTime(GetAnimation({ AnimationState::DEATH, m_Status.Orientation })))
+			Destroy();
 	}
 
 	void Monster::DrawHealth() {
 		bool hovered = false;
 		if (m_Context->HoveredEntity())
-			if (*m_Context->HoveredEntity() == m_Tile || *m_Context->HoveredEntity() == m_Body) hovered = true;
+			if (*m_Context->HoveredEntity() == Tile() || *m_Context->HoveredEntity() == m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && m_Status.Health > 0) {
 			glm::vec3 translation = m_Body.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.0f, -0.9f, 0.1f);
 			Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
@@ -177,6 +182,125 @@ namespace UCG {
 			}
 			m_AnimationQueue.AnimationTime += ts;
 		}
+	}
+
+	void Monster::StartTurn() {
+		PushAction(Action::IDLE);
+	}
+
+	bool Monster::Attack(Flora::Timestep ts) {
+		return false;
+	}
+
+	bool Monster::Move(Flora::Timestep ts) {
+		if (m_ActionQueue.ActionTime == 0.0f) {
+			if (ValidAnimation(GetAnimation({ AnimationState::MOVE, m_Status.Orientation }))) {
+				OverrideAnimation({ AnimationState::MOVE, m_Status.Orientation });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::MOVE, m_Status.Orientation }));
+			} else {
+				OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+				m_ActionQueue.TimeThreshold = 0.3f;
+			}
+		}
+		m_ActionQueue.ActionTime += ts;
+
+		std::vector<std::vector<Flora::Entity>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
+		TileRef nextTile = m_Tile;
+		switch (m_Status.Orientation) {
+		case Orientation::DR:
+			if (m_Tile.second >= (tiles[0].size() - 1)) return false;
+			nextTile.second += 1;
+			break;
+		case Orientation::UL:
+			if (m_Tile.second <= 0) return false;
+			nextTile.second -= 1;
+			break;
+		case Orientation::UR:
+			if (m_Tile.first <= 0) return false;
+			nextTile.first -= 1;
+			break;
+		default:
+			if (m_Tile.first >= (tiles.size() - 1)) return false;
+			nextTile.first += 1;
+			break;
+		}
+
+		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : ts;
+
+		glm::vec3 move_vec =
+			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.first][nextTile.second].GetComponent<Flora::TransformComponent>().Translation
+			-
+			((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].GetComponent<Flora::TransformComponent>().Translation)
+			/ 
+			m_ActionQueue.TimeThreshold)
+			*
+			stable_ts;
+
+		m_Body.GetComponent<Flora::TransformComponent>().Translation += move_vec;
+
+		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
+			m_Tile = nextTile;
+			return false;
+		}
+		return true;
+	}
+
+	bool Monster::RotateRight(Flora::Timestep ts) {
+		return false;
+	}
+
+	bool Monster::RotateLeft(Flora::Timestep ts) {
+		return false;
+	}
+
+	void Monster::PushAction(Action action) {
+		m_ActionQueue.Queue.push_back(action);
+	}
+
+	bool Monster::ValidAnimation(Animation anim) {
+		return !(std::get<0>(anim) == 0 && std::get<1>(anim) == 0 && std::get<2>(anim) == 0);
+	}
+
+	void Monster::UpdateActions(Flora::Timestep ts) {
+		if (m_ActionQueue.CurrentAction == Action::IDLE && m_ActionQueue.Queue.size() > 0) {
+			m_ActionQueue.ActionTime = 0.0f;
+			m_ActionQueue.CurrentAction = m_ActionQueue.Queue[0];
+			m_ActionQueue.Queue.erase(m_ActionQueue.Queue.begin());
+		}
+		if (m_ActionQueue.CurrentAction != Action::IDLE) {
+			switch (m_ActionQueue.CurrentAction) {
+			case Action::ATTACK:
+				if (!Attack(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				break;
+			case Action::MOVE:
+				if (!Move(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				break;
+			case Action::ROTATE_R:
+				if (!RotateRight(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				break;
+			case Action::ROTATE_L:
+				if (!RotateLeft(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				break;
+			}
+		}
+		if (m_ActionQueue.CurrentAction == Action::IDLE)
+			OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+	}
+
+	Flora::Entity Monster::Tile() {
+		return ((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second];
+	}
+
+	TileRef Monster::GetTileRef(Flora::Entity tile) {
+		std::vector<std::vector<Flora::Entity>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
+		for (int r = 0; r < tiles.size(); r++) {
+			for (int c = 0; c < tiles[0].size(); c++) {
+				if (tiles[r][c] == tile) {
+					return { r, c };
+				}
+			}
+		}
+		return { 0, 0 };
 	}
 
 }

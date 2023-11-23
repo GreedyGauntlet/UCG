@@ -22,13 +22,29 @@ namespace UCG {
 		ROTATE
 	};
 
+	enum class Action {
+		ATTACK,
+		IDLE,
+		MOVE,
+		ROTATE_R,
+		ROTATE_L
+	};
+
 	typedef std::tuple<int, int, int> Animation; // start frame, end frame, fps
 	typedef std::tuple<AnimationState, Orientation> AnimationCommand;
+	typedef std::pair<int, int> TileRef; // row, column
 
 	struct AnimationQueue {
 		std::vector<AnimationCommand> Queue;
 		AnimationCommand CurrentAnimation = { AnimationState::INVALID, Orientation::NONE };
 		float AnimationTime = 0.0f;
+	};
+
+	struct ActionQueue {
+		std::vector<Action> Queue;
+		Action CurrentAction = Action::IDLE;
+		float ActionTime = 0.0f;
+		float TimeThreshold = 0.0f;
 	};
 
 	struct AnimationMap {
@@ -60,30 +76,47 @@ namespace UCG {
 	public:
 		virtual ~Monster() = default;
 		virtual void Initialize(GameScene* context, Flora::Entity tile) = 0;
-		virtual void Update(Flora::Timestep ts) = 0;
+		virtual void Update(Flora::Timestep ts);
 		virtual void Destroy();
 		virtual void Damage(int damage);
 	public:
 		Flora::Entity Body() { return m_Body; }
-		Flora::Entity Tile() { return m_Tile; }
 		bool Alive() { return !m_Status.Dead; }
+		Flora::Entity Tile();
+		TileRef GetTileRef(Flora::Entity tile);
+		TileRef GetTileRef() { return m_Tile; }
 	protected:
 		virtual void DamageAnim(Flora::Timestep ts);
 		virtual void DeathAnim(Flora::Timestep ts);
 		virtual void DrawHealth();
 	protected:
-		virtual void QueueAnimation(AnimationCommand command);
-		virtual void OverrideAnimation(AnimationCommand command);
-		virtual void UpdateAnimation(Flora::Timestep ts);
-		virtual Animation GetAnimation(AnimationCommand command);
-		virtual float GetAnimationTime(Animation anim);
+		void QueueAnimation(AnimationCommand command);
+		void OverrideAnimation(AnimationCommand command);
+		void UpdateAnimation(Flora::Timestep ts);
+		Animation GetAnimation(AnimationCommand command);
+		float GetAnimationTime(Animation anim);
+	private:
+		bool ValidAnimation(Animation anim);
+	public:
+		virtual void StartTurn();
+		virtual void UpdateActions(Flora::Timestep ts);
+	protected:
+		virtual bool Attack(Flora::Timestep ts);
+		virtual bool Move(Flora::Timestep ts);
+		virtual bool RotateRight(Flora::Timestep ts);
+		virtual bool RotateLeft(Flora::Timestep ts);
+	protected:
+		void PushAction(Action action);
+	public:
+		bool InAction() { return m_ActionQueue.Queue.size() > 0; }
 	protected:
 		GameScene* m_Context;
 		Flora::Entity m_Body;
-		Flora::Entity m_Tile;
+		TileRef m_Tile;
 	protected:
 		AnimationMap m_Animations;
 		AnimationQueue m_AnimationQueue;
+		ActionQueue m_ActionQueue;
 		MonsterStatus m_Status;
 	};
 }

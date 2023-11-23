@@ -19,7 +19,7 @@ namespace UCG {
 		m_Framebuffer->Bind();
 		Flora::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Flora::RenderCommand::Clear();
-		RenderRuntime(Flora::Timestep(ts/2.0f), m_Camera->GetProjection());
+		RenderRuntime(Flora::Timestep(ts / 2.0f), m_Camera->GetProjection()); // note: dividing ts by 2 since we are rendering twice, otherwise animations would be twice as fast
 
 		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, Flora::Input::GetMouseX(), 900 - Flora::Input::GetMouseY());
 
@@ -27,8 +27,6 @@ namespace UCG {
 		Flora::Renderer2D::ResetStats();
 		Flora::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		Flora::RenderCommand::Clear();
-		
-
 
 		OnUpdateRuntime(Flora::Timestep(ts / 2.0f), m_Camera->GetProjection());
 		// NOTE: is doing this last going to make the framebuffer lag behind the update? 

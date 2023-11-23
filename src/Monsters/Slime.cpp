@@ -6,7 +6,7 @@ namespace UCG {
 		m_Status.MaxHealth = m_Status.Health = 3;
 		m_Context = context;
 		m_Body = m_Context->CreateEntity("Slime");
-		m_Tile = tile;
+		m_Tile = GetTileRef(tile);
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		tc.Translation = tile.GetComponent<Flora::TransformComponent>().Translation;

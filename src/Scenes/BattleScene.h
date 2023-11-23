@@ -10,7 +10,9 @@ namespace UCG {
 		PREPLAYER,
 		PREOPPONENT,
 		PLAYER,
+		ENDPLAYER,
 		OPPONENT,
+		ENDOPPONENT,
 		POSTPLAYER,
 		POSTOPPONENT,
 	};
@@ -36,6 +38,8 @@ namespace UCG {
 		virtual void Start() override;
 		virtual void Update(Flora::Timestep ts) override;
 		virtual void Stop() override;
+	public:
+		std::vector<std::vector<Flora::Entity>> GetBoardTiles() { return m_BoardEntities; }
 	private:
 		void CreateUI();
 		void UpdateUI();
@@ -55,7 +59,7 @@ namespace UCG {
 		void UpdateBoard();
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
 	private:
-		void UpdateBattleState();
+		void UpdateBattleState(Flora::Timestep ts);
 	private:
 		bool CheckHovered(Flora::Entity entity);
 		void DevCall();
