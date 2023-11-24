@@ -23,12 +23,39 @@ namespace UCG {
 		m_Animations.IdleUp = { 29, 35, 10 };
 		m_Animations.Spawn = { 8, 14, 10 };
 		m_Animations.DeathDown = { 1, 7, 10 };
+		m_Animations.AttackDown = { 15, 21, 10 };
+		m_Animations.AttackUp = { 36, 42, 10 };
 
 		QueueAnimation({AnimationState::SPAWN, Orientation::NONE});
 		QueueAnimation({AnimationState::IDLE, Orientation::DL});
 	}
 
 	void Goblin::StartTurn() {
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_L);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_L);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_L);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_L);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_R);
+		PushAction(Action::ROTATE_R);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_R);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_R);
+		PushAction(Action::MOVE);
+		PushAction(Action::ATTACK);
+		PushAction(Action::ROTATE_R);
 		PushAction(Action::MOVE);
 		PushAction(Action::ATTACK);
 		PushAction(Action::IDLE);

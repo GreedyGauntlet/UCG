@@ -147,6 +147,7 @@ namespace UCG {
 	}
 
 	float Monster::GetAnimationTime(Animation anim) {
+		if (((float)std::get<2>(anim)) <= 0) return 0.0f;
 		int numframes = std::get<1>(anim) - std::get<0>(anim);
 		return ((float)numframes) / ((float)std::get<2>(anim));
 	}
@@ -166,7 +167,6 @@ namespace UCG {
 					m_AnimationQueue.AnimationTime = 0.0f;
 				}
 				if (m_AnimationQueue.AnimationTime == 0.0f) {
-					m_Status.Orientation = std::get<1>(m_AnimationQueue.CurrentAnimation);
 					Animation curr = GetAnimation(m_AnimationQueue.CurrentAnimation);
 					Flora::SpriteRendererComponent& src = m_Body.GetComponent<Flora::SpriteRendererComponent>();
 					src.StartFrame = std::get<0>(curr);
@@ -174,7 +174,7 @@ namespace UCG {
 					src.CurrentFrame = std::get<0>(curr);
 					src.EndFrame = std::get<1>(curr);
 					src.FPS = std::get<2>(curr);
-					if (m_Status.Orientation == Orientation::DR || m_Status.Orientation == Orientation::UR)
+					if (std::get<1>(m_AnimationQueue.CurrentAnimation) == Orientation::DR || std::get<1>(m_AnimationQueue.CurrentAnimation) == Orientation::UR)
 						m_Body.GetComponent<Flora::TransformComponent>().Rotation = { 0, glm::radians(180.0f), 0 };
 					else
 						m_Body.GetComponent<Flora::TransformComponent>().Rotation = glm::vec3(0);
@@ -188,11 +188,43 @@ namespace UCG {
 		PushAction(Action::IDLE);
 	}
 
-	bool Monster::Attack(Flora::Timestep ts) {
-		return false;
+	void Monster::Attack() {
+		// TODO: default behavior to just get the thing in front and attack it
+		FL_CORE_WARN("Implement default attack please");
 	}
 
-	bool Monster::Move(Flora::Timestep ts) {
+	bool Monster::AttackAction(Flora::Timestep ts) {
+		static bool attacked = false;
+		if (m_ActionQueue.ActionTime == 0.0f) {
+			attacked = false;
+			if (ValidAnimation(GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }))) {
+				OverrideAnimation({ AnimationState::ATTACK, m_Status.Orientation });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }));
+			}
+			else {
+				OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+				m_ActionQueue.TimeThreshold = 0.5f;
+			}
+		}
+		m_ActionQueue.ActionTime += ts;
+
+		if (!attacked) {
+			float fps = ((float)std::get<2>((GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }))));
+			float max_attack_time = fps <= 0 ? 0.0f : ((float)m_ActionQueue.AttackFrame) / fps;
+			if (m_ActionQueue.ActionTime >= max_attack_time) {
+				attacked = true;
+				Attack();
+			}
+		}
+
+		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
+			attacked = false;
+			return false;
+		}
+		return true;
+	}
+
+	bool Monster::MoveAction(Flora::Timestep ts) {
 		if (m_ActionQueue.ActionTime == 0.0f) {
 			if (ValidAnimation(GetAnimation({ AnimationState::MOVE, m_Status.Orientation }))) {
 				OverrideAnimation({ AnimationState::MOVE, m_Status.Orientation });
@@ -245,12 +277,53 @@ namespace UCG {
 		return true;
 	}
 
-	bool Monster::RotateRight(Flora::Timestep ts) {
-		return false;
+	Orientation Monster::RotateOrientation(Orientation origin, bool rotateright) {
+		switch (origin) {
+		case Orientation::UL: return rotateright ? Orientation::UR : Orientation::DL;
+		case Orientation::DR: return rotateright ? Orientation::DL : Orientation::UR;
+		case Orientation::UR: return rotateright ? Orientation::DR : Orientation::UL;
+		default: return rotateright ? Orientation::UL : Orientation::DR;
+		}
 	}
 
-	bool Monster::RotateLeft(Flora::Timestep ts) {
-		return false;
+	bool Monster::RotateRightAction(Flora::Timestep ts) {
+		Orientation next_orientation = RotateOrientation(m_Status.Orientation, true);
+		if (m_ActionQueue.ActionTime == 0.0f) {
+			if (ValidAnimation(GetAnimation({ AnimationState::ROTATE, next_orientation }))) {
+				OverrideAnimation({ AnimationState::ROTATE, next_orientation });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::ROTATE, next_orientation }));
+			}
+			else {
+				OverrideAnimation({ AnimationState::IDLE, next_orientation });
+				m_ActionQueue.TimeThreshold = 0.2f;
+			}
+		}
+		m_ActionQueue.ActionTime += ts;
+		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
+			m_Status.Orientation = next_orientation;
+			return false;
+		}
+		return true;
+	}
+
+	bool Monster::RotateLeftAction(Flora::Timestep ts) {
+		Orientation next_orientation = RotateOrientation(m_Status.Orientation, false);
+		if (m_ActionQueue.ActionTime == 0.0f) {
+			if (ValidAnimation(GetAnimation({ AnimationState::ROTATE, next_orientation }))) {
+				OverrideAnimation({ AnimationState::ROTATE, next_orientation });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::ROTATE, next_orientation }));
+			}
+			else {
+				OverrideAnimation({ AnimationState::IDLE, next_orientation });
+				m_ActionQueue.TimeThreshold = 0.2f;
+			}
+		}
+		m_ActionQueue.ActionTime += ts;
+		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
+			m_Status.Orientation = next_orientation;
+			return false;
+		}
+		return true;
 	}
 
 	void Monster::PushAction(Action action) {
@@ -270,16 +343,16 @@ namespace UCG {
 		if (m_ActionQueue.CurrentAction != Action::IDLE) {
 			switch (m_ActionQueue.CurrentAction) {
 			case Action::ATTACK:
-				if (!Attack(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				if (!AttackAction(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
 				break;
 			case Action::MOVE:
-				if (!Move(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				if (!MoveAction(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
 				break;
 			case Action::ROTATE_R:
-				if (!RotateRight(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				if (!RotateRightAction(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
 				break;
 			case Action::ROTATE_L:
-				if (!RotateLeft(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
+				if (!RotateLeftAction(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
 				break;
 			}
 		}

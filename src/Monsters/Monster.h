@@ -45,6 +45,7 @@ namespace UCG {
 		Action CurrentAction = Action::IDLE;
 		float ActionTime = 0.0f;
 		float TimeThreshold = 0.0f;
+		int AttackFrame = 0; //relative to the starting point of the attack animation
 	};
 
 	struct AnimationMap {
@@ -73,9 +74,12 @@ namespace UCG {
 	};
 
 	class Monster {
+	public: // RECOMMENDED FUNCTIONS TO OVERRIDE
+		virtual void Initialize(GameScene* context, Flora::Entity tile) = 0;
+		virtual void StartTurn();
+		virtual void Attack();
 	public:
 		virtual ~Monster() = default;
-		virtual void Initialize(GameScene* context, Flora::Entity tile) = 0;
 		virtual void Update(Flora::Timestep ts);
 		virtual void Destroy();
 		virtual void Damage(int damage);
@@ -97,14 +101,14 @@ namespace UCG {
 		float GetAnimationTime(Animation anim);
 	private:
 		bool ValidAnimation(Animation anim);
+		Orientation RotateOrientation(Orientation origin, bool rotateright);
 	public:
-		virtual void StartTurn();
 		virtual void UpdateActions(Flora::Timestep ts);
 	protected:
-		virtual bool Attack(Flora::Timestep ts);
-		virtual bool Move(Flora::Timestep ts);
-		virtual bool RotateRight(Flora::Timestep ts);
-		virtual bool RotateLeft(Flora::Timestep ts);
+		virtual bool AttackAction(Flora::Timestep ts);
+		virtual bool MoveAction(Flora::Timestep ts);
+		virtual bool RotateRightAction(Flora::Timestep ts);
+		virtual bool RotateLeftAction(Flora::Timestep ts);
 	protected:
 		void PushAction(Action action);
 	public:
