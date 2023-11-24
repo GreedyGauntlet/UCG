@@ -542,6 +542,7 @@ namespace UCG {
 
 //NEXT:
 /*
+- enemy health should be visibsle when hovering over whole tile, and maybe even highlight tile yellow on hover too
 - moving goblin
 - spawn only around nexus
 - meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
