@@ -112,11 +112,7 @@ namespace UCG {
 		for (int r = 0; r < b_width; r++) {
 			std::vector<Flora::Entity> row;
 			for (int c = 0; c < b_height; c++) {
-				std::string tilename = " ";
-				tilename[0] = board[r][c];
-				Flora::Entity tile = CreateEntity(tilename);
-				tile.AddComponent<Flora::SpriteRendererComponent>();
-				tile.GetComponent<Flora::SpriteRendererComponent>().Path = BoardUtils::TilePath(board[r][c]);
+				Flora::Entity tile = BoardUtils::Tile(this, board[r][c]);
 				tile.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
 				if (board[r][c] == 'P') m_PlayerNexus = tile;
