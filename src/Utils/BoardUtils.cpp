@@ -1,15 +1,14 @@
 #include "BoardUtils.h"
-#include "../Buildings/Building.h"
 #include "flpch.h"
 
 namespace UCG {
 
-	Flora::Entity BoardUtils::Tile(Flora::Scene* context, char id) {
+	TileObj BoardUtils::Tile(Flora::Scene* context, char id) {
 		std::string tilename = " ";
 		tilename[0] = id;
 		Flora::Entity tile = context->CreateEntity(tilename);
-		Building building;
-		building.SetType(BuildingType::EMPTY);
+		Building* building = new Building();
+		building->SetType(BuildingType::EMPTY);
 		Flora::SpriteRendererComponent& src = tile.AddComponent<Flora::SpriteRendererComponent>();
 		switch (id) {
 		case 'D':
@@ -17,19 +16,19 @@ namespace UCG {
 			break;
 		case 'P':
 			src.Path = "assets/Tiles/Player.png";
-			building.SetType(BuildingType::NEXUS);
+			building->SetType(BuildingType::NEXUS);
 			break;
 		case 'O':
 			src.Path = "assets/Tiles/Opponent.png";
-			building.SetType(BuildingType::NEXUS);
+			building->SetType(BuildingType::NEXUS);
 			break;
 		case 'F':
 			src.Path = "assets/Tiles/Forest.png";
-			building.SetType(BuildingType::FOREST);
+			building->SetType(BuildingType::FOREST);
 			break;
 		case 'M':
 			src.Path = "assets/Tiles/Mountain.png";
-			building.SetType(BuildingType::MOUNTAIN);
+			building->SetType(BuildingType::MOUNTAIN);
 			break;
 		case 'W':
 			src.Path = "assets/Tiles/Water.png";
@@ -38,9 +37,9 @@ namespace UCG {
 			src.Path = "invalid";
 			break;
 		}
-		building.Initialize((GameScene*)context, tile);
-		tile.AddComponent<Flora::ChildComponent>().AddChild(building.Body());
-		return tile;
+		building->Initialize((GameScene*)context, tile);
+		tile.AddComponent<Flora::ChildComponent>().AddChild(building->Body());
+		return { building, tile };
 	}
 
 }

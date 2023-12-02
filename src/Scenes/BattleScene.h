@@ -39,7 +39,7 @@ namespace UCG {
 		virtual void Update(Flora::Timestep ts) override;
 		virtual void Stop() override;
 	public:
-		std::vector<std::vector<Flora::Entity>> GetBoardTiles() { return m_BoardEntities; }
+		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardTiles; }
 	private:
 		void CreateUI();
 		void UpdateUI();
@@ -56,7 +56,7 @@ namespace UCG {
 		void ResetBoard(const Board board);
 		void CleanBoard();
 		void DeleteBoard();
-		void UpdateBoard();
+		void UpdateBoard(Flora::Timestep ts);
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
 	private:
 		void UpdateBattleState(Flora::Timestep ts);
@@ -67,7 +67,7 @@ namespace UCG {
 		template<typename SelectFunction>
 		bool SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction, bool occupied_enabled = true, bool occupied_override = false);
 	private:
-		std::vector<std::vector<Flora::Entity>> m_BoardEntities;
+		std::vector<std::vector<TileObj>> m_BoardTiles;
 		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
 		std::vector<Monster*> m_Monsters;
 		BattleUI m_UI;

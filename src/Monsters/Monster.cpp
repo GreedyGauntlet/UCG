@@ -2,6 +2,7 @@
 #include "Flora/Math/Math.h"
 #include "../Utils/SceneUtils.h"
 #include "Flora/Renderer/Renderer2D.h"
+#include "Flora/Utils/ComponentUtils.h"
 #include "../Scenes/BattleScene.h"
 
 namespace UCG {
@@ -50,9 +51,11 @@ namespace UCG {
 	void Monster::DrawHealth() {
 		bool hovered = false;
 		if (m_Context->HoveredEntity())
-			if (*m_Context->HoveredEntity() == Tile() || *m_Context->HoveredEntity() == m_Body) hovered = true;
+			if (*m_Context->HoveredEntity() == m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && m_Status.Health > 0) {
-			glm::vec3 translation = m_Body.GetComponent<Flora::TransformComponent>().Translation + glm::vec3(0.0f, -0.9f, 0.1f);
+			glm::vec3 translation;
+			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, glm::vec3(0.0f), glm::vec3(0.0f));
+			translation += glm::vec3(0.0f, -0.9f, 0.1f);
 			Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
 			float node_width = 0.035f;
 			float padding = 0.02f;
@@ -236,7 +239,7 @@ namespace UCG {
 		}
 		m_ActionQueue.ActionTime += ts;
 
-		std::vector<std::vector<Flora::Entity>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
+		std::vector<std::vector<TileObj>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
 		TileRef nextTile = m_Tile;
 		switch (m_Status.Orientation) {
 		case Orientation::DR:
@@ -260,9 +263,9 @@ namespace UCG {
 		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : ts;
 
 		glm::vec3 move_vec =
-			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.first][nextTile.second].GetComponent<Flora::TransformComponent>().Translation
+			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.first][nextTile.second].second.GetComponent<Flora::TransformComponent>().Translation
 			-
-			((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].GetComponent<Flora::TransformComponent>().Translation)
+			((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].second.GetComponent<Flora::TransformComponent>().Translation)
 			/ 
 			m_ActionQueue.TimeThreshold)
 			*
@@ -361,14 +364,14 @@ namespace UCG {
 	}
 
 	Flora::Entity Monster::Tile() {
-		return ((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second];
+		return ((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].second;
 	}
 
 	TileRef Monster::GetTileRef(Flora::Entity tile) {
-		std::vector<std::vector<Flora::Entity>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
+		std::vector<std::vector<TileObj>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
 		for (int r = 0; r < tiles.size(); r++) {
 			for (int c = 0; c < tiles[0].size(); c++) {
-				if (tiles[r][c] == tile) {
+				if (tiles[r][c].second == tile) {
 					return { r, c };
 				}
 			}

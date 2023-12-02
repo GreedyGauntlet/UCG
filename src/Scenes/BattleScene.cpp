@@ -30,40 +30,40 @@ namespace UCG {
 	template<typename SelectFunction>
 	bool BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc, bool occupied_enabled, bool occupied_override) {
 		glm::vec2 tr = MouseCoordinates();
-		for (int r = 0; r < m_BoardEntities.size(); r++) {
-			for (int c = 0; c < m_BoardEntities.size(); c++) {
+		for (int r = 0; r < m_BoardTiles.size(); r++) {
+			for (int c = 0; c < m_BoardTiles.size(); c++) {
 				bool valid = false;
 				for (auto str : enabled_tiles) {
-					if (m_BoardEntities[r][c].GetComponent<Flora::TagComponent>().Tag == str) {
+					if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag == str) {
 						valid = true;
 						break;
 					}
 				}
 				if (valid && !occupied_enabled)
 					for (auto monster : m_Monsters)
-						if (monster->Tile() == m_BoardEntities[r][c]) {
+						if (monster->Tile() == m_BoardTiles[r][c].second) {
 							valid = false;
 							break;
 						}
 				if (!valid && occupied_override) {
 					for (auto monster : m_Monsters)
-						if (monster->Tile() == m_BoardEntities[r][c]) {
+						if (monster->Tile() == m_BoardTiles[r][c].second) {
 							valid = true;
 							break;
 						}
 				}
 				if (valid) {
-					if (TileCollision(m_BoardEntities[r][c], tr)) {
-						m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
+					if (TileCollision(m_BoardTiles[r][c].second, tr)) {
+						m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
 						if (trigger) {
-							selectfunc(this, m_BoardEntities[r][c]);
+							selectfunc(this, m_BoardTiles[r][c].second);
 							CleanBoard();
 							return true;
 						}
 					}
-					else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
+					else m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
 				}
-				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
+				else m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
 			}
 		}
 		if (trigger) return false;
@@ -81,7 +81,7 @@ namespace UCG {
 
 	void BattleScene::Update(Flora::Timestep ts) {
 		GenericUpdate(ts);
-		UpdateBoard();
+		UpdateBoard(ts);
 		UpdateHand(ts);
 		UpdateBattleState(ts);
 		DevCall();
@@ -110,26 +110,34 @@ namespace UCG {
 		int b_height = board[0].size();
 		glm::vec3 map_origin = { 0.0f, 2.0f, -1.0f };
 		for (int r = 0; r < b_width; r++) {
-			std::vector<Flora::Entity> row;
+			std::vector<TileObj> row;
 			for (int c = 0; c < b_height; c++) {
-				Flora::Entity tile = BoardUtils::Tile(this, board[r][c]);
-				tile.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
+				TileObj tile = BoardUtils::Tile(this, board[r][c]);
+				tile.second.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
-				if (board[r][c] == 'P') m_PlayerNexus = tile;
-				else if (board[r][c] == 'O') m_OpponentNexus = tile;
+				if (board[r][c] == 'P') m_PlayerNexus = tile.second;
+				else if (board[r][c] == 'O') m_OpponentNexus = tile.second;
 			}
-			m_BoardEntities.push_back(row);
+			m_BoardTiles.push_back(row);
+		}
+		for (int r = 0; r < m_BoardTiles.size(); r++) {
+			for (int c = 0; c < m_BoardTiles.size(); c++) {
+				m_BoardTiles[r][c].first->Initialize(this, m_BoardTiles[r][c].second);
+			}
 		}
 	}
 
 	void BattleScene::DeleteBoard() {
-		for (int i = 0; i < m_BoardEntities.size(); i++)
-			for (int j = 0; j < m_BoardEntities.size(); j++)
-				DestroyEntity(m_BoardEntities[i][j]);
-		m_BoardEntities.clear();
+		for (int i = 0; i < m_BoardTiles.size(); i++) {
+			for (int j = 0; j < m_BoardTiles.size(); j++) {
+				DestroyEntity(m_BoardTiles[i][j].second);
+				delete m_BoardTiles[i][j].first;
+			}
+		}
+		m_BoardTiles.clear();
 	}
 
-	void BattleScene::UpdateBoard() {
+	void BattleScene::UpdateBoard(Flora::Timestep ts) {
 		/*
 		glm::vec2 tr = MouseCoordinates();
 		for (int r = 0; r < m_BoardEntities.size(); r++) {
@@ -139,6 +147,11 @@ namespace UCG {
 				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 1.0f, 1.0f, 1.0f, 1.0f };
 			}
 		}*/
+		for (int r = 0; r < m_BoardTiles.size(); r++) {
+			for (int c = 0; c < m_BoardTiles[0].size(); c++) {
+				m_BoardTiles[r][c].first->Update(ts);
+			}
+		}
 	}
 
 	bool BattleScene::TileCollision(Flora::Entity tile, glm::vec2 translation) {
@@ -374,9 +387,9 @@ namespace UCG {
 	void BattleScene::DevCall() {
 		if (false) {
 			if (HoveredEntity()) {
-				for (int r = 0; r < m_BoardEntities.size(); r++)
-					for (int c = 0; c < m_BoardEntities[0].size(); c++)
-						if (*HoveredEntity() == m_BoardEntities[r][c])
+				for (int r = 0; r < m_BoardTiles.size(); r++)
+					for (int c = 0; c < m_BoardTiles[0].size(); c++)
+						if (*HoveredEntity() == m_BoardTiles[r][c].second)
 							FL_CORE_INFO("r: {}, c: {}", r, c);
 			}
 		}
@@ -441,9 +454,9 @@ namespace UCG {
 	}
 
 	void BattleScene::CleanBoard() {
-		for (int r = 0; r < m_BoardEntities.size(); r++) {
-			for (int c = 0; c < m_BoardEntities.size(); c++) {
-				m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = glm::vec4(1.0f);
+		for (int r = 0; r < m_BoardTiles.size(); r++) {
+			for (int c = 0; c < m_BoardTiles.size(); c++) {
+				m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = glm::vec4(1.0f);
 			}
 		}
 	}
