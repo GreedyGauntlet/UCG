@@ -16,6 +16,7 @@ namespace UCG {
 		virtual void DrawHealth() override;
 	public:
 		void SetType(BuildingType type);
+		BuildingType Type() { return m_Type; }
 	private:
 		BuildingType m_Type;
 	};

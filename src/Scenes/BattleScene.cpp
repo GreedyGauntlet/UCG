@@ -28,30 +28,93 @@ namespace UCG {
 	};
 
 	template<typename SelectFunction>
-	bool BattleScene::SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction selectfunc, bool occupied_enabled, bool occupied_override) {
+	bool BattleScene::SelectTile(bool trigger, std::vector<TileObj> workingset, SelectFunction selectfunc, TileSelectFlag flags) {
 		glm::vec2 tr = MouseCoordinates();
 		for (int r = 0; r < m_BoardTiles.size(); r++) {
 			for (int c = 0; c < m_BoardTiles.size(); c++) {
-				bool valid = false;
-				for (auto str : enabled_tiles) {
-					if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag == str) {
-						valid = true;
-						break;
-					}
-				}
-				if (valid && !occupied_enabled)
-					for (auto monster : m_Monsters)
-						if (monster->Tile() == m_BoardTiles[r][c].second) {
-							valid = false;
-							break;
-						}
-				if (!valid && occupied_override) {
-					for (auto monster : m_Monsters)
-						if (monster->Tile() == m_BoardTiles[r][c].second) {
+				bool valid = workingset.size() == 0;
+
+				if (!valid) {
+					for (TileObj obj : workingset) {
+						if ((uint32_t)m_BoardTiles[r][c].second == (uint32_t)obj.second) {
 							valid = true;
 							break;
 						}
+					}
 				}
+
+				if (valid) {
+					valid = false;
+					if (flags & TileSelectFlags::ALL)
+						valid = true;
+					else {
+						if (flags & TileSelectFlags::OCCUPIED) {
+							for (auto monster : m_Monsters)
+								if (monster->Tile() == m_BoardTiles[r][c].second) {
+									valid = true;
+									break;
+								}
+						} else if (flags & TileSelectFlags::UNOCCUPIED) {
+							valid = true;
+							for (auto monster : m_Monsters)
+								if (monster->Tile() == m_BoardTiles[r][c].second) {
+									valid = false;
+									break;
+								}
+						} else {
+							valid = true;
+						}
+						if (valid) {
+							valid = false;
+							bool specified = false;
+
+							if (flags & TileSelectFlags::DIRT) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'D')
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::FOREST) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'F')
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::MOUNTAIN) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'M')
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::PLAYER) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'P')
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::OPPONENT) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'O')
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::NEXUS) {
+								specified = true;
+								if (m_BoardTiles[r][c].first->Type() == BuildingType::NEXUS)
+									valid = true;
+							}
+
+							if (flags & TileSelectFlags::WATER) {
+								specified = true;
+								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'W')
+									valid = true;
+							}
+
+							if (!specified) valid = true;
+						}
+					}
+				}
+
 				if (valid) {
 					if (TileCollision(m_BoardTiles[r][c].second, tr)) {
 						m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
@@ -486,11 +549,11 @@ namespace UCG {
 		switch (m_CurrentSpell) {
 		case CardID::SMITE:
 			if (vfx == nullptr) {
-				if (!SelectTile(mousereleased, {}, [this](auto scene_context, auto& tile) {
+				if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
 					vfx = new LightningCloud();
 					vfx->Initialize(scene_context, tile);
 					ConsumeCard();
-				}, true, true)) ENDSPELL();
+				}, (TileSelectFlag)TileSelectFlags::OCCUPIED)) ENDSPELL();
 			} else {
 				if (vfx->Activate()) {
 					for (auto monster : m_Monsters)
@@ -505,30 +568,30 @@ namespace UCG {
 			}
 			break;
 		case CardID::GOBLIN:
-			if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
 				Monster* goblin = new Goblin();
 				goblin->Initialize(scene_context, tile);
 				m_Monsters.push_back(goblin);
 				ConsumeCard();
 				ENDSPELL();
-			}, false)) ENDSPELL();
+			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::UNOCCUPIED))) ENDSPELL();
 			break;
 		case CardID::SLIME:
-			if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
 				Monster* slime = new Slime();
 				slime->Initialize(scene_context, tile);
 				m_Monsters.push_back(slime);
 				ConsumeCard();
 				ENDSPELL();
-			}, false)) ENDSPELL();
+			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::UNOCCUPIED))) ENDSPELL();
 			break;
 		case CardID::METEOR:
 			if (vfx == nullptr) {
-				if (!SelectTile(mousereleased, { "D" }, [this](auto scene_context, auto& tile) {
+				if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
 					vfx = new Meteor();
 					vfx->Initialize(scene_context, tile);
 					ConsumeCard();
-				})) ENDSPELL();
+				}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN))) ENDSPELL();
 			}
 			else {
 				if (vfx->Activate()) {
@@ -551,8 +614,6 @@ namespace UCG {
 
 //NEXT:
 /*
-- enemy health should be visibsle when hovering over whole tile, and maybe even highlight tile yellow on hover too
-- moving goblin
 - spawn only around nexus
 - meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
 - integrate monsters killing nexus (nexus is technically a monster object!)

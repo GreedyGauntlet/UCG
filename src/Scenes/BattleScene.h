@@ -6,6 +6,22 @@
 #include "../Monsters/Monster.h"
 
 namespace UCG {
+
+	typedef uint64_t TileSelectFlag;
+
+	enum TileSelectFlags {
+		DIRT       = 1 << 0,
+		FOREST     = 1 << 1,
+		MOUNTAIN   = 1 << 2,
+		PLAYER     = 1 << 3,
+		OPPONENT   = 1 << 4,
+		NEXUS      = 1 << 5,
+		WATER      = 1 << 6,
+		OCCUPIED   = 1 << 7,
+		UNOCCUPIED = 1 << 8,
+		ALL        = 1 << 9,
+	};
+
 	enum class BattleState {
 		PREPLAYER,
 		PREOPPONENT,
@@ -65,7 +81,7 @@ namespace UCG {
 		void DevCall();
 	private:
 		template<typename SelectFunction>
-		bool SelectTile(bool trigger, std::vector<std::string> enabled_tiles, SelectFunction uifunction, bool occupied_enabled = true, bool occupied_override = false);
+		bool SelectTile(bool trigger, std::vector<TileObj> workingset, SelectFunction selectfunc, TileSelectFlag flags);
 	private:
 		std::vector<std::vector<TileObj>> m_BoardTiles;
 		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
