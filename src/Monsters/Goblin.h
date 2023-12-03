@@ -6,5 +6,6 @@ namespace UCG {
 	public:
 		virtual void Initialize(GameScene* context, Flora::Entity tile) override;
 		virtual void StartTurn() override;
+		virtual void Attack() override;
 	};
 }

@@ -52,7 +52,6 @@ namespace UCG {
 		switch (type) {
 		case BuildingType::FOREST:
 			m_Status.Health = m_Status.MaxHealth = 5;
-			FL_CORE_INFO("WHAT!");
 			break;
 		case BuildingType::MOUNTAIN:
 			m_Status.Health = m_Status.MaxHealth = 10;

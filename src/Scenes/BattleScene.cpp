@@ -167,6 +167,23 @@ namespace UCG {
 		for (auto& monster : m_Monsters) monster->Update(ts);
 	}
 
+	Monster* BattleScene::GetMonster(int r, int c) {
+		for (int i = 0; i < m_Monsters.size(); i++)
+			if ((uint32_t)(m_Monsters[i]->Tile()) == (uint32_t)(m_BoardTiles[r][c].second))
+				return m_Monsters[i];
+		return nullptr;
+	}
+
+	bool BattleScene::TileOccupied(int r, int c) {
+		if (!ValidBoardCoord(r, c)) return false;
+		TileRef tileref = { r, c };
+		for (int i = 0; i < m_Monsters.size(); i++) {
+			if (m_Monsters[i]->GetTileRef() == tileref)
+				return true;
+		}
+		return false;
+	}
+
 	void BattleScene::ResetBoard(const Board board) {
 		DeleteBoard();
 		int b_width = board.size();
@@ -402,7 +419,7 @@ namespace UCG {
 			break;
 		case BattleState::ENDPLAYER:
 			for (auto monster : m_Monsters)
-				monster->StartTurn();
+				monster->Prime();
 			m_State = BattleState::POSTPLAYER;
 			break;
 		case BattleState::POSTPLAYER:
@@ -646,7 +663,8 @@ namespace UCG {
 
 //NEXT:
 /*
-- spawn only around nexus
+- goblin full AI
+- sactuary of faith spell (creates an area, any monster summed in area is "allied" with you) 
 - meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
 - integrate monsters killing nexus (nexus is technically a monster object!)
 - redo health, mana, player border

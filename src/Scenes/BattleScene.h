@@ -56,6 +56,9 @@ namespace UCG {
 		virtual void Stop() override;
 	public:
 		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardTiles; }
+		bool ValidBoardCoord(int r, int c);
+		bool TileOccupied(int r, int c);
+		Monster* GetMonster(int r, int c);
 	private:
 		void CreateUI();
 		void UpdateUI();
@@ -75,8 +78,7 @@ namespace UCG {
 		void UpdateBoard(Flora::Timestep ts);
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
 	private:
-		std::vector<TileObj> NexusWorkingSet(bool playernexus = true, int radius = 1);
-		bool ValidBoardCoord(int r, int c);
+		std::vector<TileObj> NexusWorkingSet(bool playernexus = true, int radius = 2);
 	private:
 		void UpdateBattleState(Flora::Timestep ts);
 	private:

@@ -87,8 +87,10 @@ namespace UCG {
 		Flora::Entity Body() { return m_Body; }
 		bool Alive() { return !m_Status.Dead; }
 		Flora::Entity Tile();
+		Flora::Entity Tile(TileRef ref);
 		TileRef GetTileRef(Flora::Entity tile);
 		TileRef GetTileRef() { return m_Tile; }
+		void Prime() { m_Primed = true; }
 	protected:
 		virtual void DamageAnim(Flora::Timestep ts);
 		virtual void DeathAnim(Flora::Timestep ts);
@@ -99,9 +101,11 @@ namespace UCG {
 		void UpdateAnimation(Flora::Timestep ts);
 		Animation GetAnimation(AnimationCommand command);
 		float GetAnimationTime(Animation anim);
-	private:
+	protected:
 		bool ValidAnimation(Animation anim);
 		Orientation RotateOrientation(Orientation origin, bool rotateright);
+		TileRef FrontTile();
+		TileRef FrontTile(Orientation orientation);
 	public:
 		virtual void UpdateActions(Flora::Timestep ts);
 	protected:
@@ -112,7 +116,7 @@ namespace UCG {
 	protected:
 		void PushAction(Action action);
 	public:
-		bool InAction() { return m_ActionQueue.Queue.size() > 0; }
+		bool InAction() { return (m_ActionQueue.Queue.size() > 0) || m_Primed; }
 	protected:
 		GameScene* m_Context;
 		Flora::Entity m_Body;
@@ -122,5 +126,7 @@ namespace UCG {
 		AnimationQueue m_AnimationQueue;
 		ActionQueue m_ActionQueue;
 		MonsterStatus m_Status;
+	private:
+		bool m_Primed = false;
 	};
 }

@@ -1,4 +1,6 @@
 #include "Goblin.h"
+#include "../Scenes/BattleScene.h"
+#include "../Utils/RandomUtils.h"
 
 namespace UCG {
 
@@ -30,35 +32,82 @@ namespace UCG {
 		QueueAnimation({AnimationState::IDLE, Orientation::DL});
 	}
 
+	void Goblin::Attack() {
+		TileRef nexttile = FrontTile();
+		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+			((BattleScene*)m_Context)->GetMonster(nexttile.first, nexttile.second)->Damage(1);
+		}
+	}
+
 	void Goblin::StartTurn() {
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_L);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_L);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_L);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_L);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_R);
-		PushAction(Action::ROTATE_R);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_R);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_R);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::ROTATE_R);
-		PushAction(Action::MOVE);
-		PushAction(Action::ATTACK);
-		PushAction(Action::IDLE);
+		TileRef nexttile = FrontTile();
+		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+			PushAction(Action::ATTACK);
+			PushAction(Action::IDLE);
+			return;
+		}
+
+		Orientation curr_orient = m_Status.Orientation;
+		bool rotate_right = true;
+		int choice = RandomUtils::Random(0, 3);
+		switch (choice) {
+		case 0:
+			rotate_right = true;
+			break;
+		case 1:
+			rotate_right = false;
+			break;
+		case 2:
+			rotate_right = true;
+			PushAction(Action::ROTATE_R);
+			curr_orient = RotateOrientation(curr_orient, rotate_right);
+			break;
+		case 3:
+			rotate_right = false;
+			PushAction(Action::ROTATE_L);
+			curr_orient = RotateOrientation(curr_orient, rotate_right);
+			break;
+		}
+
+		nexttile = FrontTile(curr_orient);
+		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+			PushAction(Action::ATTACK);
+			PushAction(Action::IDLE);
+			return;
+		}
+		if (((BattleScene*)m_Context)->ValidBoardCoord(nexttile.first, nexttile.second) &&
+			Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D") {
+			PushAction(Action::MOVE);
+			PushAction(Action::IDLE);
+			return;
+		}
+
+		if (rotate_right)
+			PushAction(Action::ROTATE_R);
+		else
+			PushAction(Action::ROTATE_L);
+		Orientation nextorient = RotateOrientation(curr_orient, rotate_right);
+		while (nextorient != m_Status.Orientation) {
+
+			nexttile = FrontTile(nextorient);
+			if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+				PushAction(Action::ATTACK);
+				PushAction(Action::IDLE);
+				return;
+			}
+			if (((BattleScene*)m_Context)->ValidBoardCoord(nexttile.first, nexttile.second) &&
+				Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D") {
+				PushAction(Action::MOVE);
+				PushAction(Action::IDLE);
+				return;
+			}
+
+			if (rotate_right)
+				PushAction(Action::ROTATE_R);
+			else
+				PushAction(Action::ROTATE_L);
+			nextorient = RotateOrientation(nextorient, rotate_right);
+		}
 	}
 
 }

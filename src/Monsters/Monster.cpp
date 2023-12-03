@@ -337,7 +337,25 @@ namespace UCG {
 		return !(std::get<0>(anim) == 0 && std::get<1>(anim) == 0 && std::get<2>(anim) == 0);
 	}
 
+	TileRef Monster::FrontTile() {
+		return FrontTile(m_Status.Orientation);
+	}
+
+	TileRef Monster::FrontTile(Orientation orientation) {
+		switch (orientation) {
+		case Orientation::DR: return { m_Tile.first, m_Tile.second + 1 };
+		case Orientation::UR: return { m_Tile.first - 1, m_Tile.second };
+		case Orientation::UL: return { m_Tile.first, m_Tile.second - 1 };
+		}
+		return { m_Tile.first + 1, m_Tile.second };
+	}
+
 	void Monster::UpdateActions(Flora::Timestep ts) {
+		if (m_Primed) {
+			StartTurn();
+			m_Primed = false;
+		}
+
 		if (m_ActionQueue.CurrentAction == Action::IDLE && m_ActionQueue.Queue.size() > 0) {
 			m_ActionQueue.ActionTime = 0.0f;
 			m_ActionQueue.CurrentAction = m_ActionQueue.Queue[0];
@@ -364,7 +382,11 @@ namespace UCG {
 	}
 
 	Flora::Entity Monster::Tile() {
-		return ((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].second;
+		return Tile(m_Tile);
+	}
+
+	Flora::Entity Monster::Tile(TileRef ref) {
+		return ((BattleScene*)m_Context)->GetBoardTiles()[ref.first][ref.second].second;
 	}
 
 	TileRef Monster::GetTileRef(Flora::Entity tile) {
