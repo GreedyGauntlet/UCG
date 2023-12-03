@@ -75,6 +75,9 @@ namespace UCG {
 		void UpdateBoard(Flora::Timestep ts);
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
 	private:
+		std::vector<TileObj> NexusWorkingSet(bool playernexus = true, int radius = 1);
+		bool ValidBoardCoord(int r, int c);
+	private:
 		void UpdateBattleState(Flora::Timestep ts);
 	private:
 		bool CheckHovered(Flora::Entity entity);

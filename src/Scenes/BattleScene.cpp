@@ -524,6 +524,38 @@ namespace UCG {
 		}
 	}
 
+	bool BattleScene::ValidBoardCoord(int r, int c) {
+		if (r >= m_BoardTiles.size()) return false;
+		if (r < 0) return false;
+		if (c >= m_BoardTiles[0].size()) return false;
+		if (c < 0) return false;
+		return true;
+	}
+
+	std::vector<TileObj> BattleScene::NexusWorkingSet(bool playernexus, int radius) {
+		std::string tilestr = playernexus ? "P" : "O";
+		int row = 0;
+		int col = 0;
+		for (int r = 0; r < m_BoardTiles.size(); r++) {
+			for (int c = 0; c < m_BoardTiles[0].size(); c++) {
+				if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag == tilestr) {
+					row = r;
+					col = c;
+					break;
+				}
+			}
+		}
+		std::vector<TileObj> workingset;
+		for (int r = -1 * radius; r <= radius; r++) {
+			for (int c = -1 * radius; c <= radius; c++) {
+				if (ValidBoardCoord(row + r, col + c)) {
+					workingset.push_back(m_BoardTiles[row + r][col + c]);
+				}
+			}
+		}
+		return workingset;
+	}
+
 	void BattleScene::UpdateSpell() {
 
 		static bool mousepressed = Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0);
@@ -568,7 +600,7 @@ namespace UCG {
 			}
 			break;
 		case CardID::GOBLIN:
-			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
+			if (!SelectTile(mousereleased, NexusWorkingSet(), [this](auto scene_context, auto& tile) {
 				Monster* goblin = new Goblin();
 				goblin->Initialize(scene_context, tile);
 				m_Monsters.push_back(goblin);
