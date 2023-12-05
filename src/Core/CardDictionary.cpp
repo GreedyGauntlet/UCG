@@ -26,6 +26,11 @@ namespace UCG {
 			card.Name = "Meteor";
 			card.Description = "Summons a destructive metor that can even damage the terrain. Does 5 damage to monsters and 1 damage to terrain.";
 			break;
+		case CardID::SANCTUARY:
+			card.Cost = 2;
+			card.Name = "Sanctuary";
+			card.Description = "Turns a given tile into a sanctuary tile for 3 turns. Any monster summoned on this tile will be allied with the player.";
+			break;
 		}
 		return card;
 	}

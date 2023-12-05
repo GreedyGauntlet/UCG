@@ -655,6 +655,14 @@ namespace UCG {
 				}
 			}
 			break;
+		case CardID::SANCTUARY:
+			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
+				//implement here
+
+				ConsumeCard();
+				ENDSPELL();
+			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN | TileSelectFlags::WATER))) ENDSPELL();
+			break;
 		}
 		#undef ENDSPELL
 	}
@@ -663,7 +671,6 @@ namespace UCG {
 
 //NEXT:
 /*
-- goblin full AI
 - sactuary of faith spell (creates an area, any monster summed in area is "allied" with you) 
 - meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
 - integrate monsters killing nexus (nexus is technically a monster object!)

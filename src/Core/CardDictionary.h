@@ -3,11 +3,12 @@
 
 namespace UCG {
 	enum class CardID {
-		NONE     = -1,
-		SMITE    =  0,
-		GOBLIN   =  1,
-		SLIME    =  2,
-		METEOR   =  3,
+		NONE        = -1,
+		SMITE       =  0,
+		GOBLIN      =  1,
+		SLIME       =  2,
+		METEOR      =  3,
+		SANCTUARY   =  4,
 	};
 
 	struct Card {
