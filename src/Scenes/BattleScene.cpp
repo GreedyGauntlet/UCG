@@ -4,6 +4,7 @@
 #include "Flora/Renderer/Renderer2D.h"
 #include "Flora/Math/Math.h"
 #include "../Utils/SceneUtils.h"
+#include "../Utils/LayerUtils.h"
 #include "../VFX/VFXCore.h"
 #include "../Monsters/MonsterCore.h"
 
@@ -144,6 +145,7 @@ namespace UCG {
 
 	void BattleScene::Update(Flora::Timestep ts) {
 		GenericUpdate(ts);
+		LayerUtils::Update((Flora::Scene*)this);
 		UpdateBoard(ts);
 		UpdateHand(ts);
 		UpdateBattleState(ts);
