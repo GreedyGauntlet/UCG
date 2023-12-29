@@ -2,3 +2,7 @@
 [submodule "vendor/flora"]
 	path = vendor/flora
 	url = git@github.com:JHeflinger/flora.git
+[submodule "engine/Flora"]
+	path = engine/Flora
+	url = git@github.com:JHeflinger/Flora.git
+	branch = linux-sdk
