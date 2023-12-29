@@ -35,7 +35,8 @@ namespace UCG {
 
 	Flora::Entity* GameScene::HoveredEntity() {
 		if (EntityExists((uint32_t)m_HoveredEntity) && m_HoveredEntity > 0) {
-			return &(GetEntityFromID((uint32_t)m_HoveredEntity));
+			Flora::Entity entity = GetEntityFromID((uint32_t)m_HoveredEntity);
+			return &entity;
 		} return nullptr;
 	}
 

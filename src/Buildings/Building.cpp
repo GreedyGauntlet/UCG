@@ -25,8 +25,8 @@ namespace UCG {
 		if (m_Context->HoveredEntity())
 			if ((uint32_t)(*(m_Context->HoveredEntity())) == (uint32_t)Tile() || *m_Context->HoveredEntity() == m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && (m_Type != BuildingType::EMPTY) && (m_Type != BuildingType::NEXUS)) {
-			glm::vec3 translation;
-			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, glm::vec3(0.0f), glm::vec3(0.0f));
+			glm::vec3 translation, rotation, scale;
+			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, rotation, scale);
 			translation += glm::vec3(0.0f, -0.2f, 0.1f);
 			Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
 			float node_width = 0.035f;

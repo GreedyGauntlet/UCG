@@ -42,9 +42,9 @@ namespace UCG {
 
 	void Monster::DeathAnim(Flora::Timestep ts) {
 		if (std::get<0>(m_AnimationQueue.CurrentAnimation) != AnimationState::DEATH)
-			OverrideAnimation({ AnimationState::DEATH, m_Status.Orientation });
+			OverrideAnimation({ AnimationState::DEATH, m_Status.Direction });
 
-		if (m_AnimationQueue.AnimationTime > GetAnimationTime(GetAnimation({ AnimationState::DEATH, m_Status.Orientation })))
+		if (m_AnimationQueue.AnimationTime > GetAnimationTime(GetAnimation({ AnimationState::DEATH, m_Status.Direction })))
 			Destroy();
 	}
 
@@ -53,8 +53,8 @@ namespace UCG {
 		if (m_Context->HoveredEntity())
 			if (*m_Context->HoveredEntity() == m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && m_Status.Health > 0) {
-			glm::vec3 translation;
-			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, glm::vec3(0.0f), glm::vec3(0.0f));
+			glm::vec3 translation, rotation, scale;
+			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, rotation, scale);
 			translation += glm::vec3(0.0f, -0.9f, 0.1f);
 			Flora::Renderer2D::BeginScene(SceneUtils::MainCamera()->GetProjection());
 			float node_width = 0.035f;
@@ -114,7 +114,7 @@ namespace UCG {
 			default: return m_Animations.MoveUp;
 			}
 		case AnimationState::ROTATE:
-			switch (m_Status.Orientation) {
+			switch (m_Status.Direction) {
 			case Orientation::DR:
 				switch (orientation) {
 				case Orientation::DR: return m_Animations.IdleDown;
@@ -200,19 +200,19 @@ namespace UCG {
 		static bool attacked = false;
 		if (m_ActionQueue.ActionTime == 0.0f) {
 			attacked = false;
-			if (ValidAnimation(GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }))) {
-				OverrideAnimation({ AnimationState::ATTACK, m_Status.Orientation });
-				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }));
+			if (ValidAnimation(GetAnimation({ AnimationState::ATTACK, m_Status.Direction }))) {
+				OverrideAnimation({ AnimationState::ATTACK, m_Status.Direction });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::ATTACK, m_Status.Direction }));
 			}
 			else {
-				OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+				OverrideAnimation({ AnimationState::IDLE, m_Status.Direction });
 				m_ActionQueue.TimeThreshold = 0.5f;
 			}
 		}
 		m_ActionQueue.ActionTime += ts;
 
 		if (!attacked) {
-			float fps = ((float)std::get<2>((GetAnimation({ AnimationState::ATTACK, m_Status.Orientation }))));
+			float fps = ((float)std::get<2>((GetAnimation({ AnimationState::ATTACK, m_Status.Direction }))));
 			float max_attack_time = fps <= 0 ? 0.0f : ((float)m_ActionQueue.AttackFrame) / fps;
 			if (m_ActionQueue.ActionTime >= max_attack_time) {
 				attacked = true;
@@ -229,11 +229,11 @@ namespace UCG {
 
 	bool Monster::MoveAction(Flora::Timestep ts) {
 		if (m_ActionQueue.ActionTime == 0.0f) {
-			if (ValidAnimation(GetAnimation({ AnimationState::MOVE, m_Status.Orientation }))) {
-				OverrideAnimation({ AnimationState::MOVE, m_Status.Orientation });
-				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::MOVE, m_Status.Orientation }));
+			if (ValidAnimation(GetAnimation({ AnimationState::MOVE, m_Status.Direction }))) {
+				OverrideAnimation({ AnimationState::MOVE, m_Status.Direction });
+				m_ActionQueue.TimeThreshold = GetAnimationTime(GetAnimation({ AnimationState::MOVE, m_Status.Direction }));
 			} else {
-				OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+				OverrideAnimation({ AnimationState::IDLE, m_Status.Direction });
 				m_ActionQueue.TimeThreshold = 0.3f;
 			}
 		}
@@ -241,7 +241,7 @@ namespace UCG {
 
 		std::vector<std::vector<TileObj>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
 		TileRef nextTile = m_Tile;
-		switch (m_Status.Orientation) {
+		switch (m_Status.Direction) {
 		case Orientation::DR:
 			if (m_Tile.second >= (tiles[0].size() - 1)) return false;
 			nextTile.second += 1;
@@ -260,7 +260,7 @@ namespace UCG {
 			break;
 		}
 
-		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : ts;
+		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : (float)ts;
 
 		glm::vec3 move_vec =
 			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.first][nextTile.second].second.GetComponent<Flora::TransformComponent>().Translation
@@ -290,7 +290,7 @@ namespace UCG {
 	}
 
 	bool Monster::RotateRightAction(Flora::Timestep ts) {
-		Orientation next_orientation = RotateOrientation(m_Status.Orientation, true);
+		Orientation next_orientation = RotateOrientation(m_Status.Direction, true);
 		if (m_ActionQueue.ActionTime == 0.0f) {
 			if (ValidAnimation(GetAnimation({ AnimationState::ROTATE, next_orientation }))) {
 				OverrideAnimation({ AnimationState::ROTATE, next_orientation });
@@ -303,14 +303,14 @@ namespace UCG {
 		}
 		m_ActionQueue.ActionTime += ts;
 		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
-			m_Status.Orientation = next_orientation;
+			m_Status.Direction = next_orientation;
 			return false;
 		}
 		return true;
 	}
 
 	bool Monster::RotateLeftAction(Flora::Timestep ts) {
-		Orientation next_orientation = RotateOrientation(m_Status.Orientation, false);
+		Orientation next_orientation = RotateOrientation(m_Status.Direction, false);
 		if (m_ActionQueue.ActionTime == 0.0f) {
 			if (ValidAnimation(GetAnimation({ AnimationState::ROTATE, next_orientation }))) {
 				OverrideAnimation({ AnimationState::ROTATE, next_orientation });
@@ -323,7 +323,7 @@ namespace UCG {
 		}
 		m_ActionQueue.ActionTime += ts;
 		if (m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold) {
-			m_Status.Orientation = next_orientation;
+			m_Status.Direction = next_orientation;
 			return false;
 		}
 		return true;
@@ -338,7 +338,7 @@ namespace UCG {
 	}
 
 	TileRef Monster::FrontTile() {
-		return FrontTile(m_Status.Orientation);
+		return FrontTile(m_Status.Direction);
 	}
 
 	TileRef Monster::FrontTile(Orientation orientation) {
@@ -378,7 +378,7 @@ namespace UCG {
 			}
 		}
 		if (m_ActionQueue.CurrentAction == Action::IDLE)
-			OverrideAnimation({ AnimationState::IDLE, m_Status.Orientation });
+			OverrideAnimation({ AnimationState::IDLE, m_Status.Direction });
 	}
 
 	Flora::Entity Monster::Tile() {

@@ -1,4 +1,5 @@
 #include "LightningCloud.h"
+#include "../Utils/FileUtils.h"
 
 namespace UCG {
 
@@ -12,7 +13,7 @@ namespace UCG {
 		tc.Translation.y += 0.75f;
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
-		src.Path = "assets/VFX/Smite.png";
+		src.Path = UCG::FileUtils::Path("assets/VFX/Smite.png");
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;
 		src.Rows = 1;
 		src.Columns = 12;

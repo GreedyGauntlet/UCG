@@ -7,6 +7,7 @@
 #include "../Utils/LayerUtils.h"
 #include "../VFX/VFXCore.h"
 #include "../Monsters/MonsterCore.h"
+#include "../Utils/FileUtils.h"
 
 namespace UCG {
 
@@ -337,8 +338,8 @@ namespace UCG {
 
 		m_UI.PUI.ProfileBorder = CreateEntity("Player Profile Border");
 		m_UI.PUI.ProfilePicture = CreateEntity("Player Profile Picture");
-		m_UI.PUI.ProfileBorder.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/UI/Profiles/ForestProfile.png";
-		m_UI.PUI.ProfilePicture.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Profile.png";
+		m_UI.PUI.ProfileBorder.AddComponent<Flora::SpriteRendererComponent>().Path = UCG::FileUtils::Path("assets/UI/Profiles/ForestProfile.png");
+		m_UI.PUI.ProfilePicture.AddComponent<Flora::SpriteRendererComponent>().Path = UCG::FileUtils::Path("assets/Profile.png");
 		m_UI.PUI.ProfileBorder.GetComponent<Flora::TransformComponent>().Translation = { -5.2f, 2.65f, 998.0f };
 		m_UI.PUI.ProfilePicture.GetComponent<Flora::TransformComponent>().Translation = { -5.2f, 2.65f, 998.1f };
 
@@ -349,7 +350,7 @@ namespace UCG {
 		Flora::TransformComponent& h_top_tc = health_vessel_top.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& h_bot_src = health_vessel_bot.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& h_bot_tc = health_vessel_bot.GetComponent<Flora::TransformComponent>();
-		h_top_src.Path = h_bot_src.Path = "assets/UI/Battle/Health Vessel.png";
+		h_top_src.Path = h_bot_src.Path = UCG::FileUtils::Path("assets/UI/Battle/Health Vessel.png");
 		h_top_src.Type = h_bot_src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
 		h_top_src.Columns = h_bot_src.Columns = 1;
 		h_top_src.Rows = h_bot_src.Rows = 4;
@@ -367,7 +368,7 @@ namespace UCG {
 		Flora::TransformComponent& m_top_tc = mana_vessel_top.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& m_bot_src = mana_vessel_bot.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& m_bot_tc = mana_vessel_bot.GetComponent<Flora::TransformComponent>();
-		m_top_src.Path = m_bot_src.Path = "assets/UI/Battle/Mana Vessel.png";
+		m_top_src.Path = m_bot_src.Path = UCG::FileUtils::Path("assets/UI/Battle/Mana Vessel.png");
 		m_top_src.Type = m_bot_src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
 		m_top_src.Columns = m_bot_src.Columns = 1;
 		m_top_src.Rows = m_bot_src.Rows = 4;
@@ -382,7 +383,7 @@ namespace UCG {
 			Flora::Entity vessel = CreateEntity("Health Vessel");
 			Flora::SpriteRendererComponent& src = vessel.AddComponent<Flora::SpriteRendererComponent>();
 			Flora::TransformComponent& tc = vessel.GetComponent<Flora::TransformComponent>();
-			src.Path = "assets/UI/Battle/Health Vessel.png";
+			src.Path = UCG::FileUtils::Path("assets/UI/Battle/Health Vessel.png");
 			src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
 			src.Columns = 1;
 			src.Rows = 4;
@@ -397,7 +398,7 @@ namespace UCG {
 			Flora::Entity vessel = CreateEntity("Mana Vessel");
 			Flora::SpriteRendererComponent& src = vessel.AddComponent<Flora::SpriteRendererComponent>();
 			Flora::TransformComponent& tc = vessel.GetComponent<Flora::TransformComponent>();
-			src.Path = "assets/UI/Battle/Mana Vessel.png";
+			src.Path = UCG::FileUtils::Path("assets/UI/Battle/Mana Vessel.png");
 			src.Type = Flora::SpriteRendererComponent::SpriteType::SUBTEXTURE;
 			src.Columns = 1;
 			src.Rows = 4;
@@ -443,14 +444,14 @@ namespace UCG {
 
 	void BattleScene::DrawCard() {
 		std::pair<Flora::Entity, Card> pair = { CreateEntity("Card"), Player::GetDeck()->Draw() };
-		pair.first.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Card.png";
+		pair.first.AddComponent<Flora::SpriteRendererComponent>().Path = UCG::FileUtils::Path("assets/Card.png");
 		pair.first.GetComponent<Flora::TransformComponent>().Translation = { 0.0f, 0.0f, 1.0f };
 		pair.first.GetComponent<Flora::TransformComponent>().Scale = { 1.0f, 1.5f, 1.0f };
 		
 		Flora::ChildComponent& cc = pair.first.AddComponent<Flora::ChildComponent>();
 		for (int i = 0; i < pair.second.Cost; i++) {
 			Flora::Entity mana_node = CreateEntity("Mana Node");
-			mana_node.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Cards/Decorators/Mana Badge.png";
+			mana_node.AddComponent<Flora::SpriteRendererComponent>().Path = UCG::FileUtils::Path("assets/Cards/Decorators/Mana Badge.png");
 			mana_node.GetComponent<Flora::TransformComponent>().Translation = { -0.29f + (i%7 * 0.1f), -0.27f - (i/7 * 0.1f), 0.001f };
 			mana_node.GetComponent<Flora::TransformComponent>().Scale = { 8.0f/72.0f, 8.0f/108.0f, 1.0f };
 			mana_node.AddComponent<Flora::ParentComponent>().Parent = pair.first;
@@ -458,7 +459,7 @@ namespace UCG {
 		}
 
 		Flora::Entity splash_art = CreateEntity("Splash Art");
-		splash_art.AddComponent<Flora::SpriteRendererComponent>().Path = "assets/Cards/Splash Art/" + pair.second.Name + ".png";
+		splash_art.AddComponent<Flora::SpriteRendererComponent>().Path = UCG::FileUtils::Path("assets/Cards/Splash Art/" + pair.second.Name + ".png");
 		splash_art.GetComponent<Flora::TransformComponent>().Translation = { 0.0f, 0.0f, 0.002f };
 		splash_art.AddComponent<Flora::ParentComponent>().Parent = pair.first;
 		cc.AddChild(splash_art);

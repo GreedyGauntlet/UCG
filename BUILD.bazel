@@ -1,6 +1,7 @@
 cc_binary(
     name = "UCG",
-    srcs = ["src/main.cpp"],
+    srcs = glob(["src/*.cpp", "src/**/*.cpp", "src/*.h", "src/**/*.h"]),
+    copts = ["-DBAZEL_BUILD"],
     deps = [
         "//engine:ucg_Flora",
     ],

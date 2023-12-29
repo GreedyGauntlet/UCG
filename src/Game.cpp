@@ -1,6 +1,7 @@
 #include <Flora.h>
 #include <Flora/Core/EntryPoint.h>
 #include "GameLayer.h"
+#include "Utils/FileUtils.h"
 
 namespace Flora {
 	class Game : public Application {
@@ -8,7 +9,7 @@ namespace Flora {
 		Game(const WindowProps& props, ApplicationCommandLineArgs args)
 			: Application(props, "", args) {
 			PushLayer(new UCG::GameLayer());
-			GetWindow().SetWindowIcon("assets/templogo.png");
+			GetWindow().SetWindowIcon(UCG::FileUtils::Path("assets/templogo.png").c_str());
 		}
 
 		~Game() {

@@ -70,7 +70,7 @@ namespace UCG {
 		int MaxHealth = 1;
 		bool Damaged = false;
 		bool Dead = false;
-		Orientation Orientation = Orientation::DL;
+		Orientation Direction = Orientation::DL;
 	};
 
 	class Monster {

@@ -1,6 +1,7 @@
 #include "Goblin.h"
 #include "../Scenes/BattleScene.h"
 #include "../Utils/RandomUtils.h"
+#include "../Utils/FileUtils.h"
 
 namespace UCG {
 
@@ -16,7 +17,7 @@ namespace UCG {
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;
-		src.Path = "assets/Monsters/Goblin.png";
+		src.Path = UCG::FileUtils::Path("assets/Monsters/Goblin.png");
 		src.Frames = 42;
 		src.Rows = 1;
 		src.Columns = 42;
@@ -47,7 +48,7 @@ namespace UCG {
 			return;
 		}
 
-		Orientation curr_orient = m_Status.Orientation;
+		Orientation curr_orient = m_Status.Direction;
 		bool rotate_right = true;
 		int choice = RandomUtils::Random(0, 3);
 		switch (choice) {
@@ -87,7 +88,7 @@ namespace UCG {
 		else
 			PushAction(Action::ROTATE_L);
 		Orientation nextorient = RotateOrientation(curr_orient, rotate_right);
-		while (nextorient != m_Status.Orientation) {
+		while (nextorient != m_Status.Direction) {
 
 			nexttile = FrontTile(nextorient);
 			if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {

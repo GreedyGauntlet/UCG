@@ -1,4 +1,5 @@
 #include "Slime.h"
+#include "../Utils/FileUtils.h"
 
 namespace UCG {
 
@@ -14,7 +15,7 @@ namespace UCG {
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
 		src.Type = Flora::SpriteRendererComponent::SpriteType::ANIMATION;
-		src.Path = "assets/Monsters/Slime.png";
+		src.Path = UCG::FileUtils::Path("assets/Monsters/Slime.png");
 		src.Frames = 30;
 		src.StartFrame = 1;
 		src.EndFrame = 7;

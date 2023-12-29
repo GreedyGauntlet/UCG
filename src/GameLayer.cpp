@@ -1,7 +1,6 @@
 #include "flpch.h"
 #include "GameLayer.h"
 #include "Flora/Renderer/Renderer2D.h"
-#include "Flora/Renderer/Font.h"
 #include "Scenes/BattleScene.h"
 #include "Flora/Renderer/Framebuffer.h"
 #include "Flora/Core/Input.h"
