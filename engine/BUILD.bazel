@@ -1,0 +1,75 @@
+cc_library(
+    name = "ucg_flpch",
+    includes = ["Flora/Flora/src"],
+    hdrs = [
+        "Flora/Flora/src/flpch.h",
+        "Flora/Flora/src/Flora/Core/Base.h",
+        "Flora/Flora/src/Flora/Core/Log.h",
+        "Flora/Flora/src/Flora/Debug/Instrumentor.h"
+    ],
+    srcs = [
+        "Flora/Flora/src/flpch.cpp",
+        "Flora/Flora/src/Flora/Core/Log.cpp"
+    ],
+    deps = [
+        "//engine/Flora/Flora/vendor:spdlog",
+    ],
+    visibility = ["//visibility:public"]
+)
+
+cc_library(
+    name = "ucg_Flora",
+    includes = ["Flora/Flora/src"],
+    hdrs = glob([
+        "Flora/Flora/src/**/*.h"
+    ],
+    exclude = [
+        "Flora/Flora/src/flpch.h",
+        "Flora/Flora/src/Flora/Core/HiddenStructs.h",
+        "Flora/Flora/src/Flora/Renderer/Font.h",
+        "Flora/Flora/src/Flora/Project/ProjectSerializer.h",
+        "Flora/Flora/src/Flora/Scripting/ScriptEngine.h",
+        "Flora/Flora/src/Flora/Scripting/ScriptGlue.h",
+        "Flora/Flora/src/Flora/Utils/Serializer.h",
+    ]),
+    srcs = glob([
+        "Flora/Flora/src/**/*.cpp"
+    ],
+    exclude = [
+        "Flora/Flora/src/Platform/Windows/WindowsPlatformUtils.cpp",
+        "Flora/Flora/src/Flora/Renderer/Font.cpp",
+        "Flora/Flora/src/Flora/Project/ProjectSerializer.cpp",
+        "Flora/Flora/src/Flora/Scripting/ScriptEngine.cpp",
+        "Flora/Flora/src/Flora/Scripting/ScriptGlue.cpp",
+        "Flora/Flora/src/Flora/Utils/Serializer.cpp",
+    ]),
+    linkopts = [
+        "-lglfw",
+        "-lvulkan",
+        "-ldl",
+        "-lpthread",
+        "-lX11",
+        "-lXxf86vm",
+        "-lXrandr",
+        "-lXi",
+        "-lGL",
+        "-lGLU",
+        "-lglut",
+        "-lopenal",
+    ],
+    deps = [
+        ":ucg_flpch",
+        "//engine/Flora/Flora/vendor:entt",
+        "//engine/Flora/Flora/vendor:openAL",
+        "//engine/Flora/Flora/vendor:glad",
+        "//engine/Flora/Flora/vendor:box2d",
+        "//engine/Flora/Flora/vendor:imgui",
+        "//engine/Flora/Flora/vendor:imgui_backend",
+        "//engine/Flora/Flora/vendor:yaml-cpp",
+        "//engine/Flora/Flora/vendor:imguizmo",
+        "//engine/Flora/Flora/vendor:filewatch",
+        "//engine/Flora/Flora/vendor:stbimage",
+    ],
+    copts = ["-DBAZEL_BUILD"],
+    visibility = ["//visibility:public"]
+)

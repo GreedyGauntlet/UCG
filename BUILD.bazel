@@ -1,0 +1,7 @@
+cc_binary(
+    name = "UCG",
+    srcs = ["src/main.cpp"],
+    deps = [
+        "//engine:ucg_Flora",
+    ],
+)
