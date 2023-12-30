@@ -22,8 +22,8 @@ namespace UCG {
 
 	void Building::DrawHealth() {
 		bool hovered = false;
-		if (m_Context->HoveredEntity())
-			if ((uint32_t)(*(m_Context->HoveredEntity())) == (uint32_t)Tile() || *m_Context->HoveredEntity() == m_Body) hovered = true;
+		if (m_Context->HoveredEntity() >= 0)
+			if ((uint32_t)(m_Context->HoveredEntity()) == (uint32_t)Tile() || (uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && (m_Type != BuildingType::EMPTY) && (m_Type != BuildingType::NEXUS)) {
 			glm::vec3 translation, rotation, scale;
 			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, rotation, scale);

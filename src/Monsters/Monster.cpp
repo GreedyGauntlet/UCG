@@ -50,8 +50,8 @@ namespace UCG {
 
 	void Monster::DrawHealth() {
 		bool hovered = false;
-		if (m_Context->HoveredEntity())
-			if (*m_Context->HoveredEntity() == m_Body) hovered = true;
+		if (m_Context->HoveredEntity() >= 0)
+			if ((uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && m_Status.Health > 0) {
 			glm::vec3 translation, rotation, scale;
 			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, rotation, scale);

@@ -21,7 +21,7 @@ namespace UCG {
 		Flora::RenderCommand::Clear();
 		RenderRuntime(Flora::Timestep(ts / 2.0f), m_Camera->GetProjection()); // note: dividing ts by 2 since we are rendering twice, otherwise animations would be twice as fast
 
-		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, Flora::Input::GetMouseX(), 900 - Flora::Input::GetMouseY());
+		m_HoveredEntity = (int64_t)m_Framebuffer->ReadPixel(1, Flora::Input::GetMouseX(), m_WindowDimensions.y - Flora::Input::GetMouseY());
 
 		m_Framebuffer->Unbind();
 		Flora::Renderer2D::ResetStats();
@@ -33,11 +33,10 @@ namespace UCG {
 		//       (i dont think so, in the generic update call entities are rendered first)
 	}
 
-	Flora::Entity* GameScene::HoveredEntity() {
-		if (EntityExists((uint32_t)m_HoveredEntity) && m_HoveredEntity > 0) {
-			Flora::Entity entity = GetEntityFromID((uint32_t)m_HoveredEntity);
-			return &entity;
-		} return nullptr;
+	int64_t GameScene::HoveredEntity() {
+		if (EntityExists((uint32_t)m_HoveredEntity) && m_HoveredEntity >= 0) {
+			return (int64_t)((uint32_t)m_HoveredEntity);
+		} return -1;
 	}
 
 	glm::vec2 GameScene::MouseCoordinates() {
@@ -59,7 +58,6 @@ namespace UCG {
 	}
 
 	void GameScene::ResizeWindow(uint32_t width, uint32_t height) {
-		FL_CORE_INFO("{}, {}", width, height);
 		m_Framebuffer->Resize(width, height);
 		m_Camera->SetViewportSize(width, height);
 		m_WindowDimensions.x = width;

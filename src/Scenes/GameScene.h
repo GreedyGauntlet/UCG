@@ -11,7 +11,7 @@ namespace UCG {
 		virtual void Update(Flora::Timestep ts);
 		virtual void Stop() = 0;
 	public:
-		Flora::Entity* HoveredEntity();
+		int64_t HoveredEntity();
 		glm::vec2 MouseCoordinates();
 		void ResizeWindow(uint32_t width, uint32_t height);
 	protected:

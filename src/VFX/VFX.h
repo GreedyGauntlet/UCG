@@ -7,6 +7,7 @@
 namespace UCG {
 	class VFX {
 	public:
+		virtual ~VFX() = default;
 		virtual void Initialize(BattleScene* scene, Flora::Entity tile);
 		virtual bool Update() { return false; };
 		virtual bool Activate() { return false; };
