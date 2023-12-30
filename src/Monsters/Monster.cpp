@@ -243,7 +243,7 @@ namespace UCG {
 		TileRef nextTile = m_Tile;
 		switch (m_Status.Direction) {
 		case Orientation::DR:
-			if (m_Tile.second >= (tiles[0].size() - 1)) return false;
+			if (m_Tile.second >= (int)(tiles[0].size() - 1)) return false;
 			nextTile.second += 1;
 			break;
 		case Orientation::UL:
@@ -255,7 +255,7 @@ namespace UCG {
 			nextTile.first -= 1;
 			break;
 		default:
-			if (m_Tile.first >= (tiles.size() - 1)) return false;
+			if (m_Tile.first >= (int)(tiles.size() - 1)) return false;
 			nextTile.first += 1;
 			break;
 		}
@@ -346,6 +346,7 @@ namespace UCG {
 		case Orientation::DR: return { m_Tile.first, m_Tile.second + 1 };
 		case Orientation::UR: return { m_Tile.first - 1, m_Tile.second };
 		case Orientation::UL: return { m_Tile.first, m_Tile.second - 1 };
+		default: break;
 		}
 		return { m_Tile.first + 1, m_Tile.second };
 	}
@@ -375,6 +376,8 @@ namespace UCG {
 			case Action::ROTATE_L:
 				if (!RotateLeftAction(ts)) m_ActionQueue.CurrentAction = Action::IDLE;
 				break;
+			default:
+				break;
 			}
 		}
 		if (m_ActionQueue.CurrentAction == Action::IDLE)
@@ -391,8 +394,8 @@ namespace UCG {
 
 	TileRef Monster::GetTileRef(Flora::Entity tile) {
 		std::vector<std::vector<TileObj>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
-		for (int r = 0; r < tiles.size(); r++) {
-			for (int c = 0; c < tiles[0].size(); c++) {
+		for (size_t r = 0; r < tiles.size(); r++) {
+			for (size_t c = 0; c < tiles[0].size(); c++) {
 				if (tiles[r][c].second == tile) {
 					return { r, c };
 				}

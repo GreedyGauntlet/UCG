@@ -119,16 +119,16 @@ namespace UCG {
 
 				if (valid) {
 					if (TileCollision(m_BoardTiles[r][c].second, tr)) {
-						m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 2.0f, 2.0f, 1.0f, 1.0f };
+						DeepTint(m_BoardTiles[r][c].second, { 2.0f, 2.0f, 1.0f, 1.0f });
 						if (trigger) {
 							selectfunc(this, m_BoardTiles[r][c].second);
 							CleanBoard();
 							return true;
 						}
 					}
-					else m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.2f, 0.9f, 0.2f, 1.0f };
+					else DeepTint(m_BoardTiles[r][c].second, { 0.2f, 0.9f, 0.2f, 1.0f });
 				}
-				else m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.9f, 0.2f, 0.2f, 1.0f };
+				else DeepTint(m_BoardTiles[r][c].second, { 0.9f, 0.2f, 0.2f, 1.0f });
 			}
 		}
 		if (trigger) return false;
@@ -195,6 +195,17 @@ namespace UCG {
 				return true;
 		}
 		return false;
+	}
+
+	void BattleScene::DeepTint(Flora::Entity tile, glm::vec4 color) {
+		if (tile.HasComponent<Flora::SpriteRendererComponent>())
+			tile.GetComponent<Flora::SpriteRendererComponent>().Color = color;
+		if (tile.HasComponent<Flora::ChildComponent>()) {
+			std::vector<Flora::Entity> children = tile.GetComponent<Flora::ChildComponent>().Children;
+			for (auto& child : children) {
+				DeepTint(child, color);
+			}
+		}
 	}
 
 	void BattleScene::ResetBoard(const Board board) {
@@ -543,7 +554,7 @@ namespace UCG {
 	void BattleScene::CleanBoard() {
 		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
 			for (int c = 0; c < (int)m_BoardTiles.size(); c++) {
-				m_BoardTiles[r][c].second.GetComponent<Flora::SpriteRendererComponent>().Color = glm::vec4(1.0f);
+				DeepTint(m_BoardTiles[r][c].second, glm::vec4(1.0f));
 			}
 		}
 	}
@@ -664,8 +675,8 @@ namespace UCG {
 			break;
 		case CardID::SANCTUARY:
 			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
-				//implement here
-
+				Sanctuary persistvfx;
+				persistvfx.Initialize(scene_context, tile);
 				ConsumeCard();
 				ENDSPELL();
 			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN | TileSelectFlags::WATER))) ENDSPELL();

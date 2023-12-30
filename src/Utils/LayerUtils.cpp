@@ -24,7 +24,7 @@ namespace UCG {
 	void LayerUtils::Update(Flora::Scene* context) {
 		if (context) {
 			s_Context = context;
-			/*
+			
 			context->ForAllComponents<Flora::TransformComponent>([](auto entity, auto component) {
 				ZLayers currlayer = (ZLayers)(((int)component.Translation.z) / ((int)LAYERSIZE));
 				if (s_DepthMap.find(currlayer) == s_DepthMap.end())
@@ -32,7 +32,7 @@ namespace UCG {
 				else {
 					s_DepthMap[currlayer] = s_DepthMap[currlayer] < component.Translation.z ? component.Translation.z : s_DepthMap[currlayer];
 				}
-			});*/
+			});
 		}
 	}
 

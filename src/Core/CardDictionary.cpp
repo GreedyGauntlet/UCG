@@ -31,6 +31,8 @@ namespace UCG {
 			card.Name = "Sanctuary";
 			card.Description = "Turns a given tile into a sanctuary tile for 3 turns. Any monster summoned on this tile will be allied with the player.";
 			break;
+		default:
+			break;
 		}
 		return card;
 	}

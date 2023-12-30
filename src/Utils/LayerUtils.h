@@ -9,7 +9,8 @@ namespace UCG {
 		TILES      = 1,
 		BACKVFX    = 2,
 		OBJECT     = 3,
-		FRONTVFX   = 4
+		FRONTVFX   = 4,
+		UI         = 9,
 	};
 
 	class LayerUtils {

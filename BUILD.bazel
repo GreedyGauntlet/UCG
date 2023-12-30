@@ -6,3 +6,11 @@ cc_binary(
         "//engine:ucg_Flora",
     ],
 )
+
+cc_binary(
+    name = "UCG_prime",
+    srcs = glob(["src/*.cpp", "src/**/*.cpp", "src/*.h", "src/**/*.h"]),
+    deps = [
+        "//engine:ucg_Flora",
+    ],
+)

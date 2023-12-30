@@ -59,6 +59,8 @@ namespace UCG {
 		case BuildingType::NEXUS:
 			m_Status.Health = m_Status.MaxHealth = 20;
 			break;
+		default:
+			break;
 		}
 	}
 }

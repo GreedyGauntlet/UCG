@@ -72,6 +72,7 @@ namespace UCG {
 		void UpdateHand(Flora::Timestep ts, bool fast = false);
 		void UpdateSpell();
 	private:
+		void DeepTint(Flora::Entity tile, glm::vec4 color);
 		void ResetBoard(const Board board);
 		void CleanBoard();
 		void DeleteBoard();
