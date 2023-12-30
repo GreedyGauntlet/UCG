@@ -19,6 +19,7 @@ namespace UCG {
 	private:
 		void PreUpdate();
 		void PostUpdate();
+		bool OnWindowResize(Flora::WindowResizeEvent& e);
 	private:
 		GameScene* m_Scene;
 	};

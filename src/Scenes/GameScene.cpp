@@ -42,11 +42,28 @@ namespace UCG {
 
 	glm::vec2 GameScene::MouseCoordinates() {
 		glm::vec2 coords = { 0.0f, 0.0f };
-		double gamew = (double)m_Camera->GetOrthographicSize() - 0.72; //-0.72 for ???? reason? not sure why we have to correct this, look into this in flora later but rn its an internal correction prob ig
-		double gameh = gamew * (900.0 / 1600.0);
-		coords.x = (double)(gamew * 2 * (((double)Flora::Input::GetMouseX())/1600.0) - gamew);
-		coords.y = (double)(gameh * 2 * (((double)(900 - Flora::Input::GetMouseY())) / 900.0) - gameh);
+		Flora::SceneCamera::OrthographicBinding binding = m_Camera->GetBinding();
+		
+		double gamew = 1.0f;
+		double gameh = 1.0f;
+		if (binding == Flora::SceneCamera::OrthographicBinding::Vertical) {
+			gameh = (double)(m_Camera->GetOrthographicSize());
+			gamew = gameh * (m_WindowDimensions.x / m_WindowDimensions.y);
+		} else {
+			gamew = (double)(m_Camera->GetOrthographicSize());
+			gameh = gamew * (m_WindowDimensions.y / m_WindowDimensions.x);
+		}
+		coords.x = (double)(gamew * (((double)Flora::Input::GetMouseX()) / m_WindowDimensions.x) - (gamew / 2.0));
+		coords.y = (double)(gameh * (((double)(m_WindowDimensions.y - Flora::Input::GetMouseY())) / m_WindowDimensions.y) - (gameh / 2.0));
 		return coords;
+	}
+
+	void GameScene::ResizeWindow(uint32_t width, uint32_t height) {
+		FL_CORE_INFO("{}, {}", width, height);
+		m_Framebuffer->Resize(width, height);
+		m_Camera->SetViewportSize(width, height);
+		m_WindowDimensions.x = width;
+		m_WindowDimensions.y = height;
 	}
 
 }

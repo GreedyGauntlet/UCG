@@ -154,6 +154,16 @@ namespace UCG {
 		UpdateSpell();
 		UpdateMonsters(ts);
 		UpdateUI();
+
+		glm::vec2 mc = MouseCoordinates();
+		Flora::Renderer2D::BeginScene(m_Camera->GetProjection());
+		glm::vec3 translation, rotation, scale;
+		translation = {mc.x, mc.y, 998.0f};
+		rotation = {0.0f, 0.0f, 0.0f};
+		scale = {0.1f, 0.1f, 1.0f};
+		glm::mat4 transform = Flora::Math::ComposeTransform(translation, rotation, scale);
+		Flora::Renderer2D::DrawCircle(transform);
+		Flora::Renderer2D::EndScene();
 	}
 
 	void BattleScene::Stop() {
@@ -221,15 +231,6 @@ namespace UCG {
 	}
 
 	void BattleScene::UpdateBoard(Flora::Timestep ts) {
-		/*
-		glm::vec2 tr = MouseCoordinates();
-		for (int r = 0; r < m_BoardEntities.size(); r++) {
-			for (int c = 0; c < m_BoardEntities.size(); c++) {
-				if (TileCollision(m_BoardEntities[r][c], tr))
-					m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
-				else m_BoardEntities[r][c].GetComponent<Flora::SpriteRendererComponent>().Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-			}
-		}*/
 		for (int r = 0; r < m_BoardTiles.size(); r++) {
 			for (int c = 0; c < m_BoardTiles[0].size(); c++) {
 				m_BoardTiles[r][c].first->Update(ts);

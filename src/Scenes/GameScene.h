@@ -3,6 +3,8 @@
 #include "Flora/Scene/Scene.h"
 
 namespace UCG {
+	typedef glm::vec2 WindowDimensions;
+
 	class GameScene : public Flora::Scene {
 	public:
 		virtual void Start() = 0;
@@ -11,6 +13,7 @@ namespace UCG {
 	public:
 		Flora::Entity* HoveredEntity();
 		glm::vec2 MouseCoordinates();
+		void ResizeWindow(uint32_t width, uint32_t height);
 	protected:
 		void GenericUpdate(Flora::Timestep ts);
 	protected:
@@ -18,5 +21,6 @@ namespace UCG {
 	private:
 		Flora::Ref<Flora::Framebuffer> m_Framebuffer;
 		int64_t m_HoveredEntity = -1;
+		WindowDimensions m_WindowDimensions;
 	};
 }

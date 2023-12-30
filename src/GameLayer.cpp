@@ -29,7 +29,10 @@ namespace UCG {
 	}
 
 	void GameLayer::OnEvent(Flora::Event& e) {
-
+		if (e.GetEventType() == Flora::EventType::WindowResize) {
+			Flora::EventDispatcher dispatcher(e);
+			dispatcher.Dispatch<Flora::WindowResizeEvent>(std::bind(&GameLayer::OnWindowResize, this, std::placeholders::_1));
+		}
 	}
 
 	void GameLayer::PreUpdate() {
@@ -38,5 +41,10 @@ namespace UCG {
 
 	void GameLayer::PostUpdate() {
 
+	}
+
+	bool GameLayer::OnWindowResize(Flora::WindowResizeEvent& e) {
+		m_Scene->ResizeWindow(e.GetWidth(), e.GetHeight());
+		return false;
 	}
 }
