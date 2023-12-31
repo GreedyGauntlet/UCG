@@ -11,6 +11,9 @@ namespace UCG {
 		virtual void Initialize(BattleScene* scene, Flora::Entity tile);
 		virtual bool Update() { return false; };
 		virtual bool Activate() { return false; };
+		virtual bool TurnUpdate() { return false; };
+		virtual void PersistantUpdate() {};
+		virtual void Kill();
 	public:
 		Flora::Entity Tile() { return m_Tile; }
 	protected:

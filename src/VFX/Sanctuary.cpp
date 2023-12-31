@@ -1,5 +1,6 @@
 #include "Sanctuary.h"
 #include "../Utils/FileUtils.h"
+#include "Flora/Core/Log.h"
 
 namespace UCG {
 
@@ -13,18 +14,12 @@ namespace UCG {
 		tc.Scale = { 1.0f, 1.0f, 1.0f };
 		src.Path = UCG::FileUtils::Path("assets/VFX/Sanctuary.png");
 		if (!m_Tile.HasComponent<Flora::ChildComponent>()) m_Tile.AddComponent<Flora::ChildComponent>();
-		m_VFX.AddComponent<Flora::ParentComponent>().Parent = m_VFX;
+		m_VFX.AddComponent<Flora::ParentComponent>().Parent = m_Tile;
 		m_Tile.GetComponent<Flora::ChildComponent>().AddChild(m_VFX);
 	}
 
-	bool Sanctuary::Update() {
-        
-		return true;
+	bool Sanctuary::TurnUpdate() {
+        m_Health--;
+		return m_Health > 0;
 	}
-
-	bool Sanctuary::Activate() {
-        
-        return true;
-	}
-
 }

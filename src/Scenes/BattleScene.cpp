@@ -32,13 +32,13 @@ namespace UCG {
 	template<typename SelectFunction>
 	bool BattleScene::SelectTile(bool trigger, std::vector<TileObj> workingset, SelectFunction selectfunc, TileSelectFlag flags) {
 		glm::vec2 tr = MouseCoordinates();
-		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardTiles.size(); c++) {
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
 				bool valid = workingset.size() == 0;
 
 				if (!valid) {
 					for (TileObj obj : workingset) {
-						if ((uint32_t)m_BoardTiles[r][c].second == (uint32_t)obj.second) {
+						if ((uint32_t)m_BoardObjects.BoardTiles[r][c].second == (uint32_t)obj.second) {
 							valid = true;
 							break;
 						}
@@ -51,15 +51,15 @@ namespace UCG {
 						valid = true;
 					else {
 						if (flags & TileSelectFlags::OCCUPIED) {
-							for (auto monster : m_Monsters)
-								if (monster->Tile() == m_BoardTiles[r][c].second) {
+							for (auto monster : m_BoardObjects.Monsters)
+								if (monster->Tile() == m_BoardObjects.BoardTiles[r][c].second) {
 									valid = true;
 									break;
 								}
 						} else if (flags & TileSelectFlags::UNOCCUPIED) {
 							valid = true;
-							for (auto monster : m_Monsters)
-								if (monster->Tile() == m_BoardTiles[r][c].second) {
+							for (auto monster : m_BoardObjects.Monsters)
+								if (monster->Tile() == m_BoardObjects.BoardTiles[r][c].second) {
 									valid = false;
 									break;
 								}
@@ -72,43 +72,43 @@ namespace UCG {
 
 							if (flags & TileSelectFlags::DIRT) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'D')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'D')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::FOREST) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'F')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'F')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::MOUNTAIN) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'M')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'M')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::PLAYER) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'P')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'P')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::OPPONENT) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'O')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'O')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::NEXUS) {
 								specified = true;
-								if (m_BoardTiles[r][c].first->Type() == BuildingType::NEXUS)
+								if (m_BoardObjects.BoardTiles[r][c].first->Type() == BuildingType::NEXUS)
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::WATER) {
 								specified = true;
-								if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'W')
+								if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag[0] == 'W')
 									valid = true;
 							}
 
@@ -118,17 +118,17 @@ namespace UCG {
 				}
 
 				if (valid) {
-					if (TileCollision(m_BoardTiles[r][c].second, tr)) {
-						DeepTint(m_BoardTiles[r][c].second, { 2.0f, 2.0f, 1.0f, 1.0f });
+					if (TileCollision(m_BoardObjects.BoardTiles[r][c].second, tr)) {
+						DeepTint(m_BoardObjects.BoardTiles[r][c].second, { 2.0f, 2.0f, 1.0f, 1.0f });
 						if (trigger) {
-							selectfunc(this, m_BoardTiles[r][c].second);
+							selectfunc(this, m_BoardObjects.BoardTiles[r][c].second);
 							CleanBoard();
 							return true;
 						}
 					}
-					else DeepTint(m_BoardTiles[r][c].second, { 0.2f, 0.9f, 0.2f, 1.0f });
+					else DeepTint(m_BoardObjects.BoardTiles[r][c].second, { 0.2f, 0.9f, 0.2f, 1.0f });
 				}
-				else DeepTint(m_BoardTiles[r][c].second, { 0.9f, 0.2f, 0.2f, 1.0f });
+				else DeepTint(m_BoardObjects.BoardTiles[r][c].second, { 0.9f, 0.2f, 0.2f, 1.0f });
 			}
 		}
 		if (trigger) return false;
@@ -141,7 +141,7 @@ namespace UCG {
 		ResetBoard(test_map);
 		DrawHand();
 		m_Camera = SceneUtils::MainCamera();
-		m_Monsters.clear();
+		m_BoardObjects.Monsters.clear();
 	}
 
 	void BattleScene::Update(Flora::Timestep ts) {
@@ -171,27 +171,27 @@ namespace UCG {
 	}
 
 	void BattleScene::UpdateMonsters(Flora::Timestep ts) {
-		for (int i = 0; i < (int)m_Monsters.size(); i++) {
-			if (!m_Monsters[i]->Alive()) {
-				delete m_Monsters[i];
-				m_Monsters.erase(m_Monsters.begin() + i);
+		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++) {
+			if (!m_BoardObjects.Monsters[i]->Alive()) {
+				delete m_BoardObjects.Monsters[i];
+				m_BoardObjects.Monsters.erase(m_BoardObjects.Monsters.begin() + i);
 			}
 		}
-		for (auto& monster : m_Monsters) monster->Update(ts);
+		for (auto& monster : m_BoardObjects.Monsters) monster->Update(ts);
 	}
 
 	Monster* BattleScene::GetMonster(int r, int c) {
-		for (int i = 0; i < (int)m_Monsters.size(); i++)
-			if ((uint32_t)(m_Monsters[i]->Tile()) == (uint32_t)(m_BoardTiles[r][c].second))
-				return m_Monsters[i];
+		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++)
+			if ((uint32_t)(m_BoardObjects.Monsters[i]->Tile()) == (uint32_t)(m_BoardObjects.BoardTiles[r][c].second))
+				return m_BoardObjects.Monsters[i];
 		return nullptr;
 	}
 
 	bool BattleScene::TileOccupied(int r, int c) {
 		if (!ValidBoardCoord(r, c)) return false;
 		TileRef tileref = { r, c };
-		for (int i = 0; i < (int)m_Monsters.size(); i++) {
-			if (m_Monsters[i]->GetTileRef() == tileref)
+		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++) {
+			if (m_BoardObjects.Monsters[i]->GetTileRef() == tileref)
 				return true;
 		}
 		return false;
@@ -219,32 +219,32 @@ namespace UCG {
 				TileObj tile = BoardUtils::Tile(this, board[r][c]);
 				tile.second.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
-				if (board[r][c] == 'P') m_PlayerNexus = tile.second;
-				else if (board[r][c] == 'O') m_OpponentNexus = tile.second;
+				if (board[r][c] == 'P') m_BoardObjects.PlayerNexus = tile.second;
+				else if (board[r][c] == 'O') m_BoardObjects.OpponentNexus = tile.second;
 			}
-			m_BoardTiles.push_back(row);
+			m_BoardObjects.BoardTiles.push_back(row);
 		}
-		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardTiles.size(); c++) {
-				m_BoardTiles[r][c].first->Initialize(this, m_BoardTiles[r][c].second);
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
+				m_BoardObjects.BoardTiles[r][c].first->Initialize(this, m_BoardObjects.BoardTiles[r][c].second);
 			}
 		}
 	}
 
 	void BattleScene::DeleteBoard() {
-		for (int i = 0; i < (int)m_BoardTiles.size(); i++) {
-			for (int j = 0; j < (int)m_BoardTiles.size(); j++) {
-				DestroyEntity(m_BoardTiles[i][j].second);
-				delete m_BoardTiles[i][j].first;
+		for (int i = 0; i < (int)m_BoardObjects.BoardTiles.size(); i++) {
+			for (int j = 0; j < (int)m_BoardObjects.BoardTiles.size(); j++) {
+				DestroyEntity(m_BoardObjects.BoardTiles[i][j].second);
+				delete m_BoardObjects.BoardTiles[i][j].first;
 			}
 		}
-		m_BoardTiles.clear();
+		m_BoardObjects.BoardTiles.clear();
 	}
 
 	void BattleScene::UpdateBoard(Flora::Timestep ts) {
-		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardTiles[0].size(); c++) {
-				m_BoardTiles[r][c].first->Update(ts);
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++) {
+				m_BoardObjects.BoardTiles[r][c].first->Update(ts);
 			}
 		}
 	}
@@ -270,7 +270,7 @@ namespace UCG {
 	}
 
 	void BattleScene::DrawHand() {
-		m_Hand.clear();
+		m_Hand.Cards.clear();
 		for (int i = 0; i < 5; i++) DrawCard();
 	}
 
@@ -278,19 +278,19 @@ namespace UCG {
 		// move cards to respective hand pos
 		float base_padding = 0.75f;
 		float card_speed = (float)ts * 60.0f;
-		if (m_Hand.size() > 6)
-			base_padding = (base_padding * 6.0f) / (float)m_Hand.size();
-		glm::vec3 origin = { 5.0f - (base_padding * (float)m_Hand.size()), -2.3f, 1.0f };
+		if (m_Hand.Cards.size() > 6)
+			base_padding = (base_padding * 6.0f) / (float)m_Hand.Cards.size();
+		glm::vec3 origin = { 5.0f - (base_padding * (float)m_Hand.Cards.size()), -2.3f, 1.0f };
 		float threshold = 0.0001f;
-		for (int i = 0; i < (int)m_Hand.size(); i++) {
-			Flora::TransformComponent& tc = m_Hand[i].first.GetComponent<Flora::TransformComponent>();
+		for (int i = 0; i < (int)m_Hand.Cards.size(); i++) {
+			Flora::TransformComponent& tc = m_Hand.Cards[i].first.GetComponent<Flora::TransformComponent>();
 			glm::vec3 dest_tr = { origin.x + (base_padding * (i + 1)), origin.y, origin.z + 0.01f * i };
-			glm::vec3 dest_rt = { 0.0f, 0.0f, glm::radians(((float)(m_Hand.size() - (i + 1)) / (float)m_Hand.size()) * 45.0f) };
-			if (m_SelectedCard == i) {
+			glm::vec3 dest_rt = { 0.0f, 0.0f, glm::radians(((float)(m_Hand.Cards.size() - (i + 1)) / (float)m_Hand.Cards.size()) * 45.0f) };
+			if (m_Hand.SelectedCard == i) {
 				dest_rt = glm::vec3(0.0f);
-				dest_tr = { MouseCoordinates().x, MouseCoordinates().y, m_Hand.size() * 0.01f + origin.z };
+				dest_tr = { MouseCoordinates().x, MouseCoordinates().y, m_Hand.Cards.size() * 0.01f + origin.z };
 			}
-			if (m_CurrentSpellCardIndex == i) {
+			if (m_Hand.CurrentSpellCardIndex == i) {
 				dest_rt = glm::vec3(0.0f);
 				dest_tr = { 5.0f, 0.0f, 1.0f };
 			}
@@ -318,8 +318,8 @@ namespace UCG {
 		}
 
 		// card hover highlighting
-		for (int i = 0; i < (int)m_Hand.size(); i++) {
-			Flora::Entity card = m_Hand[i].first;
+		for (int i = 0; i < (int)m_Hand.Cards.size(); i++) {
+			Flora::Entity card = m_Hand.Cards[i].first;
 			Flora::SpriteRendererComponent& src = card.GetComponent<Flora::SpriteRendererComponent>();
 			if (CheckHovered(card))
 				src.Color = { 0.5f, 0.5f, 1.0f, 1.0f };
@@ -328,22 +328,22 @@ namespace UCG {
 		}
 
 		// card activation
-		if (m_SelectedCard >= 0 && m_CurrentSpellCardIndex < 0) {
-			Flora::Entity card = m_Hand[m_SelectedCard].first;
+		if (m_Hand.SelectedCard >= 0 && m_Hand.CurrentSpellCardIndex < 0) {
+			Flora::Entity card = m_Hand.Cards[m_Hand.SelectedCard].first;
 			if (card.GetComponent<Flora::TransformComponent>().Translation.y > -1.0f) {
 				card.GetComponent<Flora::SpriteRendererComponent>().Color = { 0.5f, 1.0f, 0.5f, 1.0f };
 				if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0))
-					ActivateCard(m_SelectedCard);
+					ActivateCard(m_Hand.SelectedCard);
 			}
 		}
 
 		// card dragging
-		if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0)) m_SelectedCard = -1;
-		else if (m_SelectedCard < 0 && m_CurrentSpellCardIndex < 0)
+		if (!Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0)) m_Hand.SelectedCard = -1;
+		else if (m_Hand.SelectedCard < 0 && m_Hand.CurrentSpellCardIndex < 0)
 			if (HoveredEntity() >= 0)
-				for (int i = 0; i < (int)m_Hand.size(); i++)
-					if (CheckHovered(m_Hand[i].first)) {
-						m_SelectedCard = i;
+				for (int i = 0; i < (int)m_Hand.Cards.size(); i++)
+					if (CheckHovered(m_Hand.Cards[i].first)) {
+						m_Hand.SelectedCard = i;
 					}
 	}
 
@@ -426,31 +426,38 @@ namespace UCG {
 	void BattleScene::UpdateBattleState(Flora::Timestep ts) {
 		bool fieldaction = false;
 
-		switch (m_State) {
+		switch (m_Stats.State) {
 		case BattleState::PREPLAYER:
+			for (size_t i = 0; i < m_BoardObjects.VFXs.size(); i++) {
+				if (!m_BoardObjects.VFXs[i]->TurnUpdate()) {
+					m_BoardObjects.VFXs[i]->Kill();
+					delete m_BoardObjects.VFXs[i];
+					m_BoardObjects.VFXs.erase(m_BoardObjects.VFXs.begin() + i);
+				}
+			}
 			DrawCard();
-			m_State = BattleState::PLAYER;
+			m_Stats.State = BattleState::PLAYER;
 			break;
 		case BattleState::PLAYER:
 			break;
 		case BattleState::ENDPLAYER:
-			for (auto monster : m_Monsters)
+			for (auto monster : m_BoardObjects.Monsters)
 				monster->Prime();
-			m_State = BattleState::POSTPLAYER;
+			m_Stats.State = BattleState::POSTPLAYER;
 			break;
 		case BattleState::POSTPLAYER:
 			fieldaction = false;
-			for (auto monster : m_Monsters) {
+			for (auto monster : m_BoardObjects.Monsters) {
 				if (monster->InAction()) {
 					fieldaction = true;
 					monster->UpdateActions(ts);
 					break;
 				}
 			}
-			if (!fieldaction) m_State = BattleState::PREOPPONENT;
+			if (!fieldaction) m_Stats.State = BattleState::PREOPPONENT;
 			break;
 		case BattleState::PREOPPONENT:
-			m_State = BattleState::PREPLAYER;
+			m_Stats.State = BattleState::PREPLAYER;
 			break;
 		default:
 			break;
@@ -479,15 +486,15 @@ namespace UCG {
 		splash_art.AddComponent<Flora::ParentComponent>().Parent = pair.first;
 		cc.AddChild(splash_art);
 
-		m_Hand.push_back(pair);
+		m_Hand.Cards.push_back(pair);
 	}
 
 	void BattleScene::DevCall() {
 		if (false) {
 			if (HoveredEntity() >= 0) {
-				for (int r = 0; r < (int)m_BoardTiles.size(); r++)
-					for (int c = 0; c < (int)m_BoardTiles[0].size(); c++)
-						if ((uint32_t)HoveredEntity() == (uint32_t)(m_BoardTiles[r][c].second))
+				for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++)
+					for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++)
+						if ((uint32_t)HoveredEntity() == (uint32_t)(m_BoardObjects.BoardTiles[r][c].second))
 							FL_CORE_INFO("r: {}, c: {}", r, c);
 			}
 		}
@@ -495,7 +502,7 @@ namespace UCG {
 		if (d_down) {
 			if (!Flora::Input::IsKeyPressed(Flora::Key::D)) {
 				if (Flora::Input::IsKeyPressed(Flora::Key::T)) {
-					m_State = BattleState::ENDPLAYER;
+					m_Stats.State = BattleState::ENDPLAYER;
 				}
 				else {
 					DrawCard();
@@ -521,21 +528,21 @@ namespace UCG {
 	}
 
 	bool BattleScene::ActivateCard(int cardIndex) {
-		Card info = m_Hand[cardIndex].second;
+		Card info = m_Hand.Cards[cardIndex].second;
 		if (m_Stats.PlayerMana >= info.Cost) {
-			m_CurrentSpell = info.ID;
-			m_CurrentSpellCardIndex = cardIndex;
+			m_Hand.CurrentSpell = info.ID;
+			m_Hand.CurrentSpellCardIndex = cardIndex;
 			return true;
 		}
 		return false;
 	}
 
 	void BattleScene::ConsumeCard() {
-		Flora::Entity card = m_Hand[m_CurrentSpellCardIndex].first;
-		Card info = m_Hand[m_CurrentSpellCardIndex].second;
+		Flora::Entity card = m_Hand.Cards[m_Hand.CurrentSpellCardIndex].first;
+		Card info = m_Hand.Cards[m_Hand.CurrentSpellCardIndex].second;
 		m_Stats.PlayerMana -= info.Cost;
-		m_Hand.erase(m_Hand.begin() + m_CurrentSpellCardIndex);
-		m_CurrentSpellCardIndex = -1;
+		m_Hand.Cards.erase(m_Hand.Cards.begin() + m_Hand.CurrentSpellCardIndex);
+		m_Hand.CurrentSpellCardIndex = -1;
 		DestroyEntity(card);
 	}
 
@@ -552,17 +559,17 @@ namespace UCG {
 	}
 
 	void BattleScene::CleanBoard() {
-		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardTiles.size(); c++) {
-				DeepTint(m_BoardTiles[r][c].second, glm::vec4(1.0f));
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
+				DeepTint(m_BoardObjects.BoardTiles[r][c].second, glm::vec4(1.0f));
 			}
 		}
 	}
 
 	bool BattleScene::ValidBoardCoord(int r, int c) {
-		if (r >= (int)m_BoardTiles.size()) return false;
+		if (r >= (int)m_BoardObjects.BoardTiles.size()) return false;
 		if (r < 0) return false;
-		if (c >= (int)m_BoardTiles[0].size()) return false;
+		if (c >= (int)m_BoardObjects.BoardTiles[0].size()) return false;
 		if (c < 0) return false;
 		return true;
 	}
@@ -571,9 +578,9 @@ namespace UCG {
 		std::string tilestr = playernexus ? "P" : "O";
 		int row = 0;
 		int col = 0;
-		for (int r = 0; r < (int)m_BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardTiles[0].size(); c++) {
-				if (m_BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag == tilestr) {
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++) {
+				if (m_BoardObjects.BoardTiles[r][c].second.GetComponent<Flora::TagComponent>().Tag == tilestr) {
 					row = r;
 					col = c;
 					break;
@@ -584,7 +591,7 @@ namespace UCG {
 		for (int r = -1 * radius; r <= radius; r++) {
 			for (int c = -1 * radius; c <= radius; c++) {
 				if (ValidBoardCoord(row + r, col + c)) {
-					workingset.push_back(m_BoardTiles[row + r][col + c]);
+					workingset.push_back(m_BoardObjects.BoardTiles[row + r][col + c]);
 				}
 			}
 		}
@@ -603,7 +610,7 @@ namespace UCG {
 		} else mousepressed = Flora::Input::IsMouseButtonPressed(Flora::Mouse::Button0);
 
 		static bool firstpass = true;
-		if (firstpass && m_CurrentSpell != CardID::NONE) {
+		if (firstpass && m_Hand.CurrentSpell != CardID::NONE) {
 			if (mousereleased) {
 				firstpass = false;
 				return;
@@ -612,8 +619,8 @@ namespace UCG {
 
 		static VFX* vfx = nullptr;
 
-		#define ENDSPELL() {m_CurrentSpell = CardID::NONE; firstpass = true; m_CurrentSpellCardIndex = -1; CleanBoard();}
-		switch (m_CurrentSpell) {
+		#define ENDSPELL() {m_Hand.CurrentSpell = CardID::NONE; firstpass = true; m_Hand.CurrentSpellCardIndex = -1; CleanBoard();}
+		switch (m_Hand.CurrentSpell) {
 		case CardID::SMITE:
 			if (vfx == nullptr) {
 				if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
@@ -623,7 +630,7 @@ namespace UCG {
 				}, (TileSelectFlag)TileSelectFlags::OCCUPIED)) ENDSPELL();
 			} else {
 				if (vfx->Activate()) {
-					for (auto monster : m_Monsters)
+					for (auto monster : m_BoardObjects.Monsters)
 						if (monster->Tile() == vfx->Tile())
 							monster->Damage(1);
 				}
@@ -638,7 +645,7 @@ namespace UCG {
 			if (!SelectTile(mousereleased, NexusWorkingSet(), [this](auto scene_context, auto& tile) {
 				Monster* goblin = new Goblin();
 				goblin->Initialize(scene_context, tile);
-				m_Monsters.push_back(goblin);
+				m_BoardObjects.Monsters.push_back(goblin);
 				ConsumeCard();
 				ENDSPELL();
 			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::UNOCCUPIED))) ENDSPELL();
@@ -647,7 +654,7 @@ namespace UCG {
 			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
 				Monster* slime = new Slime();
 				slime->Initialize(scene_context, tile);
-				m_Monsters.push_back(slime);
+				m_BoardObjects.Monsters.push_back(slime);
 				ConsumeCard();
 				ENDSPELL();
 			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::UNOCCUPIED))) ENDSPELL();
@@ -662,7 +669,7 @@ namespace UCG {
 			}
 			else {
 				if (vfx->Activate()) {
-					for (auto monster : m_Monsters)
+					for (auto monster : m_BoardObjects.Monsters)
 						if (monster->Tile() == vfx->Tile())
 							monster->Damage(3);
 				}
@@ -675,8 +682,8 @@ namespace UCG {
 			break;
 		case CardID::SANCTUARY:
 			if (!SelectTile(mousereleased, std::vector<TileObj>(), [this](auto scene_context, auto& tile) {
-				Sanctuary persistvfx;
-				persistvfx.Initialize(scene_context, tile);
+				m_BoardObjects.VFXs.push_back(new Sanctuary());
+				m_BoardObjects.VFXs[m_BoardObjects.VFXs.size() - 1]->Initialize(scene_context, tile);
 				ConsumeCard();
 				ENDSPELL();
 			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN | TileSelectFlags::WATER))) ENDSPELL();

@@ -31,3 +31,7 @@ scripts/__pycache__
 
 # vscode
 /.vscode*
+
+# jason custom
+run.sh
+build.sh

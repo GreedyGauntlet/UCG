@@ -3,11 +3,28 @@
 #include "../Utils/BoardUtils.h"
 #include "../Core/Player.h"
 #include "../Core/CardDictionary.h"
-#include "../Monsters/Monster.h"
 
 namespace UCG {
 
 	typedef uint64_t TileSelectFlag;
+
+	class VFX;
+	class Monster;
+
+	struct BoardObjects {
+		Flora::Entity PlayerNexus;
+		Flora::Entity OpponentNexus;
+		std::vector<std::vector<TileObj>> BoardTiles;
+		std::vector<Monster*> Monsters;
+		std::vector<VFX*> VFXs;
+	};
+
+	struct Hand {
+		std::vector<std::pair<Flora::Entity, Card>> Cards;
+		int SelectedCard = -1;
+		CardID CurrentSpell = CardID::NONE;
+		int CurrentSpellCardIndex = -1;
+	};
 
 	enum TileSelectFlags {
 		DIRT       = 1 << 0,
@@ -45,6 +62,7 @@ namespace UCG {
 	};
 
 	struct BattleStats {
+		BattleState State = BattleState::PREPLAYER;
 		int PlayerHealth = 20;
 		int PlayerMana = 28;
 	};
@@ -55,7 +73,7 @@ namespace UCG {
 		virtual void Update(Flora::Timestep ts) override;
 		virtual void Stop() override;
 	public:
-		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardTiles; }
+		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardObjects.BoardTiles; }
 		bool ValidBoardCoord(int r, int c);
 		bool TileOccupied(int r, int c);
 		Monster* GetMonster(int r, int c);
@@ -89,17 +107,9 @@ namespace UCG {
 		template<typename SelectFunction>
 		bool SelectTile(bool trigger, std::vector<TileObj> workingset, SelectFunction selectfunc, TileSelectFlag flags);
 	private:
-		std::vector<std::vector<TileObj>> m_BoardTiles;
-		std::vector<std::pair<Flora::Entity, Card>> m_Hand;
-		std::vector<Monster*> m_Monsters;
+		BoardObjects m_BoardObjects;
+		Hand m_Hand;
 		BattleUI m_UI;
 		BattleStats m_Stats;
-		BattleState m_State = BattleState::PREPLAYER;
-		int m_SelectedCard = -1;
-		CardID m_CurrentSpell = CardID::NONE;
-		int m_CurrentSpellCardIndex = -1;
-	private:
-		Flora::Entity m_PlayerNexus;
-		Flora::Entity m_OpponentNexus;
 	};
 }

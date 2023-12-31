@@ -7,4 +7,8 @@ namespace UCG {
 		m_Scene = scene;
 	}
 
+	void VFX::Kill() {
+		m_Scene->DestroyEntity(m_VFX);
+	}
+
 }
