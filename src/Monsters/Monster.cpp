@@ -49,7 +49,7 @@ namespace UCG {
 	}
 
 	void Monster::DrawHealth() {
-		bool hovered = false;
+		bool hovered  = false;
 		if (m_Context->HoveredEntity() >= 0)
 			if ((uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && m_Status.Health > 0) {
@@ -62,7 +62,8 @@ namespace UCG {
 			float width = (node_width + padding) * m_Status.MaxHealth + padding;
 			Flora::Renderer2D::DrawQuad(Flora::Math::ComposeTransform(translation, { 0.0f, 0.0f, 0.0f }, { width, 0.08, 1.0f }), { 0.0f, 0.0f, 0.0f, 1.0f });
 			for (int i = 0; i < m_Status.MaxHealth; i++) {
-				glm::vec4 color = i + 1 <= m_Status.Health ? glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        glm::vec4 fillcolor = m_Status.Allegiance == Allegiances::NONE ? glm::vec4(0.0f, 1.0f, 0.0f, 1.0f) : (m_Status.Allegiance == Allegiances::PLAYER ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f) : glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); 
+				glm::vec4 color = i + 1 <= m_Status.Health ? fillcolor : glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 				Flora::Renderer2D::DrawQuad(
 					Flora::Math::ComposeTransform(
 						translation + glm::vec3((padding * (i + 2)) + (node_width * i) - (width / 2.0f), 0.0f, 0.1f),

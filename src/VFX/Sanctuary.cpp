@@ -27,7 +27,7 @@ namespace UCG {
 	void Sanctuary::PersistantUpdate() {
 	  Monster* occupied = m_Scene->GetMonster(m_TileCoords.first, m_TileCoords.second);
     if (occupied) {
-      occupied->Body().GetComponent<Flora::SpriteRendererComponent>().Color = {1.0, 0.5f, 0.5f, 1.0f}; 
+      occupied->SetAllegiance(m_PlayerAligned ? Allegiances::PLAYER : Allegiances::OPPONENT);
     }
   }
 }
