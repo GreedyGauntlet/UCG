@@ -152,7 +152,7 @@ namespace UCG {
 		UpdateBattleState(ts);
 		DevCall();
 		UpdateSpell();
-		UpdateMonsters(ts);
+		UpdateBoardObjects(ts);
 		UpdateUI();
 
 		glm::vec2 mc = MouseCoordinates();
@@ -170,7 +170,7 @@ namespace UCG {
 
 	}
 
-	void BattleScene::UpdateMonsters(Flora::Timestep ts) {
+	void BattleScene::UpdateBoardObjects(Flora::Timestep ts) {
 		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++) {
 			if (!m_BoardObjects.Monsters[i]->Alive()) {
 				delete m_BoardObjects.Monsters[i];
@@ -178,6 +178,11 @@ namespace UCG {
 			}
 		}
 		for (auto& monster : m_BoardObjects.Monsters) monster->Update(ts);
+		for (auto& vfx : m_BoardObjects.VFXs) vfx->PersistantUpdate(); 
+		// note: we leave generic time updates and vfx destruction to be 
+		//done manually via blocking the card activation function or turn 
+		//updating because its safer to do there in case time-sensitive 
+		//events get overriden or mixed
 	}
 
 	Monster* BattleScene::GetMonster(int r, int c) {
@@ -185,6 +190,14 @@ namespace UCG {
 			if ((uint32_t)(m_BoardObjects.Monsters[i]->Tile()) == (uint32_t)(m_BoardObjects.BoardTiles[r][c].second))
 				return m_BoardObjects.Monsters[i];
 		return nullptr;
+	}
+
+	std::pair<int, int> BattleScene::GetTileCoords(Flora::Entity tile) {
+		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++)
+			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++)
+				if (m_BoardObjects.BoardTiles[r][c].second == tile)
+					return {r, c};
+		return {-1, -1};
 	}
 
 	bool BattleScene::TileOccupied(int r, int c) {

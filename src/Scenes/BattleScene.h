@@ -77,11 +77,12 @@ namespace UCG {
 		bool ValidBoardCoord(int r, int c);
 		bool TileOccupied(int r, int c);
 		Monster* GetMonster(int r, int c);
+		std::pair<int, int> GetTileCoords(Flora::Entity tile);
 	private:
 		void CreateUI();
 		void UpdateUI();
 	private:
-		void UpdateMonsters(Flora::Timestep ts);
+		void UpdateBoardObjects(Flora::Timestep ts);
 	private:
 		void DrawHand();
 		void DrawCard();
