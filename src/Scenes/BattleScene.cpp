@@ -711,7 +711,6 @@ namespace UCG {
 
 //NEXT:
 /*
-- sactuary of faith spell (creates an area, any monster summed in area is "allied" with you) 
 - meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
 - integrate monsters killing nexus (nexus is technically a monster object!)
 - redo health, mana, player border
@@ -719,7 +718,7 @@ namespace UCG {
 - integrate turns
 - if needles done:
 	- implement needles
-	- implem,ent multiplayer Ui
+	- implem,ent multiplayer ui
 - else:
 	- just start creating cards and tuning up UI
 */
