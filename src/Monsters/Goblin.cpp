@@ -2,6 +2,7 @@
 #include "../Scenes/BattleScene.h"
 #include "../Utils/RandomUtils.h"
 #include "../Utils/FileUtils.h"
+#include "Behaviors.h"
 
 namespace UCG {
 
@@ -34,9 +35,11 @@ namespace UCG {
 	}
 
 	void Goblin::Attack() {
-		TileRef nexttile = FrontTile();
-		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
-			((BattleScene*)m_Context)->GetMonster(nexttile.first, nexttile.second)->Damage(1);
+		TileSet los;
+		los.push_back(FrontTile());
+		TileSet targets = Behaviors::Target((BattleScene*)m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+		if (targets.size() > 0) {
+			((BattleScene*)m_Context)->GetMonster(targets[0].first, targets[0].second)->Damage(1);
 		}
 	}
 

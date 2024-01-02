@@ -21,7 +21,7 @@ namespace UCG {
 	void Monster::Update(Flora::Timestep ts) {
 		DrawHealth();
 		DamageAnim(ts);
-		UpdateAnimation(ts);
+		UpdateAnimation(ts);	
 	}
 
 	void Monster::DamageAnim(Flora::Timestep ts) {
