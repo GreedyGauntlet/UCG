@@ -30,11 +30,11 @@ namespace UCG {
 		ROTATE_L
 	};
 
-  enum class Allegiances {
-    NONE,
-    PLAYER,
-    OPPONENT,
-  };
+	enum class Allegiances {
+		NONE,
+		PLAYER,
+		OPPONENT,
+	};
 
 	typedef std::tuple<int, int, int> Animation; // start frame, end frame, fps
 	typedef std::tuple<AnimationState, Orientation> AnimationCommand;
@@ -71,7 +71,7 @@ namespace UCG {
 	};
 
 	struct MonsterStatus {
-    Allegiances Allegiance = Allegiances::NONE;
+		Allegiances Allegiance = Allegiances::NONE;
 		float RelativeTime = 0.0f;
 		int Health = 1;
 		int MaxHealth = 1;
@@ -98,9 +98,10 @@ namespace UCG {
 		TileRef GetTileRef(Flora::Entity tile);
 		TileRef GetTileRef() { return m_Tile; }
 		void Prime() { m_Primed = true; }
-public:
-    Allegiances GetAllegiance() { return m_Status.Allegiance; }
-    void SetAllegiance(Allegiances allegiance) { m_Status.Allegiance = allegiance; }
+		MonsterStatus Status() { return m_Status; }
+	public:
+    	Allegiances GetAllegiance() { return m_Status.Allegiance; }
+		void SetAllegiance(Allegiances allegiance) { m_Status.Allegiance = allegiance; }
 	protected:
 		virtual void DamageAnim(Flora::Timestep ts);
 		virtual void DeathAnim(Flora::Timestep ts);

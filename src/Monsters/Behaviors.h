@@ -1,5 +1,6 @@
 #pragma once
 #include "Monster.h"
+#include "../Scenes/BattleScene.h"
 
 namespace UCG {
 	typedef std::vector<TileRef> TileSet;
@@ -10,12 +11,11 @@ namespace UCG {
 		FAR            = 1 << 2,
 		LINEAR         = 1 << 3,
 		DIAGONAL       = 1 << 4,
-    	ALL            = 1 << 5,
-    	DIRECTIONAL    = 1 << 6,
+    	DIRECTIONAL    = 1 << 5,
 	};
 
 	class Behaviors {
 	public:
-		static TileSet Target(GameScene* context, const Monster& subject, ObjectSelectFlags flags, uint32_t numTargets = 1, const TileSet& excluded = TileSet(), const TileSet& included = TileSet());
+		static TileSet Target(BattleScene* context, Monster& subject, ObjectSelectFlags flags, uint32_t numTargets = 1, const TileSet& included = TileSet());
 	};
 }
