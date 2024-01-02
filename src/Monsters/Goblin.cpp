@@ -35,17 +35,15 @@ namespace UCG {
 	}
 
 	void Goblin::Attack() {
-		TileSet los;
-		los.push_back(FrontTile());
-		TileSet targets = Behaviors::Target((BattleScene*)m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
-		if (targets.size() > 0) {
-			((BattleScene*)m_Context)->GetMonster(targets[0].first, targets[0].second)->Damage(1);
-		}
+		((BattleScene*)m_Context)->GetMonster(FrontTile().first, FrontTile().second)->Damage(1);
 	}
 
 	void Goblin::StartTurn() {
 		TileRef nexttile = FrontTile();
-		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+		TileSet los;
+		los.push_back(nexttile);
+		TileSet targets = Behaviors::Target((BattleScene*)m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+		if (targets.size() > 0) {
 			PushAction(Action::ATTACK);
 			PushAction(Action::IDLE);
 			return;
@@ -73,14 +71,18 @@ namespace UCG {
 			break;
 		}
 
-		nexttile = FrontTile(curr_orient);
-		if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+		nexttile = FrontTile(curr_orient);	
+		los.clear();
+		los.push_back(nexttile);
+		targets = Behaviors::Target((BattleScene*)m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+		if (targets.size() > 0) {
 			PushAction(Action::ATTACK);
 			PushAction(Action::IDLE);
 			return;
 		}
 		if (((BattleScene*)m_Context)->ValidBoardCoord(nexttile.first, nexttile.second) &&
-			Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D") {
+			Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D" &&
+			!((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
 			PushAction(Action::MOVE);
 			PushAction(Action::IDLE);
 			return;
@@ -94,13 +96,17 @@ namespace UCG {
 		while (nextorient != m_Status.Direction) {
 
 			nexttile = FrontTile(nextorient);
-			if (((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
+			los.clear();
+			los.push_back(nexttile);
+			targets = Behaviors::Target((BattleScene*)m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+			if (targets.size() > 0) {
 				PushAction(Action::ATTACK);
 				PushAction(Action::IDLE);
 				return;
 			}
 			if (((BattleScene*)m_Context)->ValidBoardCoord(nexttile.first, nexttile.second) &&
-				Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D") {
+				Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D" &&
+				!((BattleScene*)m_Context)->TileOccupied(nexttile.first, nexttile.second)) {
 				PushAction(Action::MOVE);
 				PushAction(Action::IDLE);
 				return;
