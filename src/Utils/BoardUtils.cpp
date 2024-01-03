@@ -38,7 +38,7 @@ namespace UCG {
 			src.Path = "invalid";
 			break;
 		}
-		building->Initialize((GameScene*)context, tile);
+		building->Initialize(context, tile);
 		tile.AddComponent<Flora::ChildComponent>().AddChild(building->Body());
 		return { building, tile };
 	}

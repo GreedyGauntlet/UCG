@@ -244,29 +244,29 @@ namespace UCG {
 		TileRef nextTile = m_Tile;
 		switch (m_Status.Direction) {
 		case Orientation::DR:
-			if (m_Tile.second >= (int)(tiles[0].size() - 1)) return false;
-			nextTile.second += 1;
+			if (m_Tile.c >= (int)(tiles[0].size() - 1)) return false;
+			nextTile.c += 1;
 			break;
 		case Orientation::UL:
-			if (m_Tile.second <= 0) return false;
-			nextTile.second -= 1;
+			if (m_Tile.c <= 0) return false;
+			nextTile.c -= 1;
 			break;
 		case Orientation::UR:
-			if (m_Tile.first <= 0) return false;
-			nextTile.first -= 1;
+			if (m_Tile.r <= 0) return false;
+			nextTile.r -= 1;
 			break;
 		default:
-			if (m_Tile.first >= (int)(tiles.size() - 1)) return false;
-			nextTile.first += 1;
+			if (m_Tile.r >= (int)(tiles.size() - 1)) return false;
+			nextTile.r += 1;
 			break;
 		}
 
 		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : (float)ts;
 
 		glm::vec3 move_vec =
-			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.first][nextTile.second].second.GetComponent<Flora::TransformComponent>().Translation
+			((((BattleScene*)m_Context)->GetBoardTiles()[nextTile.r][nextTile.c].second.GetComponent<Flora::TransformComponent>().Translation
 			-
-			((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.first][m_Tile.second].second.GetComponent<Flora::TransformComponent>().Translation)
+			((BattleScene*)m_Context)->GetBoardTiles()[m_Tile.r][m_Tile.c].second.GetComponent<Flora::TransformComponent>().Translation)
 			/ 
 			m_ActionQueue.TimeThreshold)
 			*
@@ -344,12 +344,12 @@ namespace UCG {
 
 	TileRef Monster::FrontTile(Orientation orientation) {
 		switch (orientation) {
-		case Orientation::DR: return { m_Tile.first, m_Tile.second + 1 };
-		case Orientation::UR: return { m_Tile.first - 1, m_Tile.second };
-		case Orientation::UL: return { m_Tile.first, m_Tile.second - 1 };
+		case Orientation::DR: return { m_Tile.r, m_Tile.c + 1 };
+		case Orientation::UR: return { m_Tile.r - 1, m_Tile.c };
+		case Orientation::UL: return { m_Tile.r, m_Tile.c - 1 };
 		default: break;
 		}
-		return { m_Tile.first + 1, m_Tile.second };
+		return { m_Tile.r + 1, m_Tile.c };
 	}
 
 	void Monster::UpdateActions(Flora::Timestep ts) {
@@ -390,19 +390,7 @@ namespace UCG {
 	}
 
 	Flora::Entity Monster::Tile(TileRef ref) {
-		return ((BattleScene*)m_Context)->GetBoardTiles()[ref.first][ref.second].second;
-	}
-
-	TileRef Monster::GetTileRef(Flora::Entity tile) {
-		std::vector<std::vector<TileObj>> tiles = ((BattleScene*)m_Context)->GetBoardTiles();
-		for (size_t r = 0; r < tiles.size(); r++) {
-			for (size_t c = 0; c < tiles[0].size(); c++) {
-				if (tiles[r][c].second == tile) {
-					return { r, c };
-				}
-			}
-		}
-		return { 0, 0 };
+		return ((BattleScene*)m_Context)->GetBoardTiles()[ref.r][ref.c].second;
 	}
 
 }

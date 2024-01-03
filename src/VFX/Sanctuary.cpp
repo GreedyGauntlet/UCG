@@ -1,33 +1,32 @@
 #include "Sanctuary.h"
 #include "../Utils/FileUtils.h"
-#include "Flora/Core/Log.h"
 
 namespace UCG {
 
-	void Sanctuary::Initialize(BattleScene* scene, Flora::Entity tile) {
+	void Sanctuary::Initialize(BattleScene* scene, TileRef tile) {
 		m_VFX = scene->CreateEntity("VFX Sanctuary");
 		m_Tile = tile;
 		m_Scene = scene;
-		m_TileCoords = m_Scene->GetTileCoords(m_Tile);
 		Flora::SpriteRendererComponent& src = m_VFX.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& tc = m_VFX.GetComponent<Flora::TransformComponent>();
 		tc.Translation.z = 0.011f;
 		tc.Scale = { 1.0f, 1.0f, 1.0f };
 		src.Path = UCG::FileUtils::Path("assets/VFX/Sanctuary.png");
-		if (!m_Tile.HasComponent<Flora::ChildComponent>()) m_Tile.AddComponent<Flora::ChildComponent>();
-		m_VFX.AddComponent<Flora::ParentComponent>().Parent = m_Tile;
-		m_Tile.GetComponent<Flora::ChildComponent>().AddChild(m_VFX);
+		Flora::Entity tile_ent = scene->GetTileObj(tile).second;
+		if (!tile_ent.HasComponent<Flora::ChildComponent>()) tile_ent.AddComponent<Flora::ChildComponent>();
+		m_VFX.AddComponent<Flora::ParentComponent>().Parent = tile_ent;
+		tile_ent.GetComponent<Flora::ChildComponent>().AddChild(m_VFX);
 	}
 
 	bool Sanctuary::TurnUpdate() {
-    m_Health--;
+		m_Health--;
 		return m_Health > 0;
 	}
 
 	void Sanctuary::PersistantUpdate() {
-	  Monster* occupied = m_Scene->GetMonster(m_TileCoords.first, m_TileCoords.second);
-    if (occupied) {
-      occupied->SetAllegiance(m_PlayerAligned ? Allegiances::PLAYER : Allegiances::OPPONENT);
-    }
-  }
+		Monster* occupied = m_Scene->GetMonster(m_Tile.r, m_Tile.c);
+		if (occupied) {
+			occupied->SetAllegiance(m_PlayerAligned ? Allegiances::PLAYER : Allegiances::OPPONENT);
+		}
+	}
 }

@@ -8,17 +8,17 @@ namespace UCG {
 	class VFX {
 	public:
 		virtual ~VFX() = default;
-		virtual void Initialize(BattleScene* scene, Flora::Entity tile);
+		virtual void Initialize(BattleScene* scene, TileRef tile);
 		virtual bool Update() { return false; };
 		virtual bool Activate() { return false; };
 		virtual bool TurnUpdate() { return false; };
 		virtual void PersistantUpdate() {};
 		virtual void Kill();
 	public:
-		Flora::Entity Tile() { return m_Tile; }
+		TileRef Tile() { return m_Tile; }
 	protected:
 		Flora::Entity m_VFX;
-		Flora::Entity m_Tile;
+		TileRef m_Tile;
 		BattleScene* m_Scene;
 		bool m_Active = false;
 	};

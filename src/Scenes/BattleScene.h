@@ -76,10 +76,11 @@ namespace UCG {
 		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardObjects.BoardTiles; }
 		bool ValidBoardCoord(int r, int c);
 		bool TileOccupied(int r, int c);
-		bool TileOccupied(TileRef tile) { return TileOccupied(tile.first, tile.second); }
+		bool TileOccupied(TileRef tile) { return TileOccupied(tile.r, tile.c); }
 		Monster* GetMonster(int r, int c);
-		Monster* GetMonster(TileRef tile) { return GetMonster(tile.first, tile.second); }
-		std::pair<int, int> GetTileCoords(Flora::Entity tile);
+		Monster* GetMonster(TileRef tile) { return GetMonster(tile.r, tile.c); }
+		TileRef GetTileRef(Flora::Entity tile);
+		TileObj GetTileObj(TileRef tile) { return m_BoardObjects.BoardTiles[tile.r][tile.c]; }
 	private:
 		void CreateUI();
 		void UpdateUI();

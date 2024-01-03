@@ -1,9 +1,12 @@
 #pragma once
 #include "Flora.h"
-#include "Flora/Scene/Scene.h"
-#include "../Scenes/GameScene.h"
+#include "Flora/Scene/Entity.h"
+#include "../Core/Structures.h"
 
 namespace UCG {
+
+	class BattleScene;
+
 	enum class Orientation {
 		NONE,
 		DL,
@@ -38,7 +41,6 @@ namespace UCG {
 
 	typedef std::tuple<int, int, int> Animation; // start frame, end frame, fps
 	typedef std::tuple<AnimationState, Orientation> AnimationCommand;
-	typedef std::pair<int, int> TileRef; // row, column
 
 	struct AnimationQueue {
 		std::vector<AnimationCommand> Queue;
@@ -82,7 +84,7 @@ namespace UCG {
 
 	class Monster {
 	public: // RECOMMENDED FUNCTIONS TO OVERRIDE
-		virtual void Initialize(GameScene* context, Flora::Entity tile) = 0;
+		virtual void Initialize(BattleScene* context, TileRef tile) {};
 		virtual void StartTurn();
 		virtual void Attack();
 	public:
@@ -95,7 +97,6 @@ namespace UCG {
 		bool Alive() { return !m_Status.Dead; }
 		Flora::Entity Tile();
 		Flora::Entity Tile(TileRef ref);
-		TileRef GetTileRef(Flora::Entity tile);
 		TileRef GetTileRef() { return m_Tile; }
 		void Prime() { m_Primed = true; }
 		MonsterStatus Status() { return m_Status; }
@@ -129,7 +130,7 @@ namespace UCG {
 	public:
 		bool InAction() { return (m_ActionQueue.Queue.size() > 0) || m_Primed; }
 	protected:
-		GameScene* m_Context;
+		BattleScene* m_Context;
 		Flora::Entity m_Body;
 		TileRef m_Tile;
 	protected:

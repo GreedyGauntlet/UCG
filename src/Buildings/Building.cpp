@@ -6,12 +6,11 @@
 #include "../Scenes/BattleScene.h"
 
 namespace UCG {
-	void Building::Initialize(GameScene* context, Flora::Entity tile) {
-		m_Context = context;
-		m_Tile = GetTileRef(tile);
-		m_Body = m_Context->CreateEntity("Building");
+	void Building::Initialize(Flora::Scene* context, Flora::Entity tile) {
+		m_Context = (BattleScene*)context;
+		m_TileBody = tile;
+		m_Body = context->CreateEntity("Building");
 		m_Body.AddComponent<Flora::ParentComponent>().Parent = tile;
-
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		tc.Translation.z = 0.01f;
@@ -23,7 +22,7 @@ namespace UCG {
 	void Building::DrawHealth() {
 		bool hovered = false;
 		if (m_Context->HoveredEntity() >= 0)
-			if ((uint32_t)(m_Context->HoveredEntity()) == (uint32_t)Tile() || (uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_Body) hovered = true;
+			if ((uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_TileBody || (uint32_t)(m_Context->HoveredEntity()) == (uint32_t)m_Body) hovered = true;
 		if ((m_Status.Health != m_Status.MaxHealth || hovered) && (m_Type != BuildingType::EMPTY) && (m_Type != BuildingType::NEXUS)) {
 			glm::vec3 translation, rotation, scale;
 			Flora::Math::DecomposeTransform(Flora::ComponentUtils::GetWorldTransform(m_Body), translation, rotation, scale);

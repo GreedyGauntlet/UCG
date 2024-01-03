@@ -2,7 +2,7 @@
 
 namespace UCG {
 
-	void VFX::Initialize(BattleScene* scene, Flora::Entity tile)  {
+	void VFX::Initialize(BattleScene* scene, TileRef tile)  {
 		m_Tile = tile;
 		m_Scene = scene;
 	}

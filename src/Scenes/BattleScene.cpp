@@ -121,7 +121,8 @@ namespace UCG {
 					if (TileCollision(m_BoardObjects.BoardTiles[r][c].second, tr)) {
 						DeepTint(m_BoardObjects.BoardTiles[r][c].second, { 2.0f, 2.0f, 1.0f, 1.0f });
 						if (trigger) {
-							selectfunc(this, m_BoardObjects.BoardTiles[r][c].second);
+							TileRef ref = {r, c};
+							selectfunc(this, ref);
 							CleanBoard();
 							return true;
 						}
@@ -154,16 +155,6 @@ namespace UCG {
 		UpdateSpell();
 		UpdateBoardObjects(ts);
 		UpdateUI();
-
-		glm::vec2 mc = MouseCoordinates();
-		Flora::Renderer2D::BeginScene(m_Camera->GetProjection());
-		glm::vec3 translation, rotation, scale;
-		translation = {mc.x, mc.y, 998.0f};
-		rotation = {0.0f, 0.0f, 0.0f};
-		scale = {0.1f, 0.1f, 1.0f};
-		glm::mat4 transform = Flora::Math::ComposeTransform(translation, rotation, scale);
-		Flora::Renderer2D::DrawCircle(transform);
-		Flora::Renderer2D::EndScene();
 	}
 
 	void BattleScene::Stop() {
@@ -192,7 +183,7 @@ namespace UCG {
 		return nullptr;
 	}
 
-	std::pair<int, int> BattleScene::GetTileCoords(Flora::Entity tile) {
+	TileRef BattleScene::GetTileRef(Flora::Entity tile) {
 		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++)
 			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++)
 				if (m_BoardObjects.BoardTiles[r][c].second == tile)
@@ -212,7 +203,8 @@ namespace UCG {
 
 	void BattleScene::DeepTint(Flora::Entity tile, glm::vec4 color) {
 		if (tile.HasComponent<Flora::SpriteRendererComponent>())
-			tile.GetComponent<Flora::SpriteRendererComponent>().Color = color;
+			if (tile.GetComponent<Flora::SpriteRendererComponent>().Color.w != 0.0f)
+				tile.GetComponent<Flora::SpriteRendererComponent>().Color = color;
 		if (tile.HasComponent<Flora::ChildComponent>()) {
 			std::vector<Flora::Entity> children = tile.GetComponent<Flora::ChildComponent>().Children;
 			for (auto& child : children) {
@@ -643,9 +635,8 @@ namespace UCG {
 				}, (TileSelectFlag)TileSelectFlags::OCCUPIED)) ENDSPELL();
 			} else {
 				if (vfx->Activate()) {
-					for (auto monster : m_BoardObjects.Monsters)
-						if (monster->Tile() == vfx->Tile())
-							monster->Damage(1);
+					Monster* occupied_mon = GetMonster(vfx->Tile());
+					if (occupied_mon) occupied_mon->Damage(1);
 				}
 				if (!vfx->Update()) {
 					delete vfx;
@@ -681,10 +672,9 @@ namespace UCG {
 				}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN))) ENDSPELL();
 			}
 			else {
-				if (vfx->Activate()) {
-					for (auto monster : m_BoardObjects.Monsters)
-						if (monster->Tile() == vfx->Tile())
-							monster->Damage(3);
+				if (vfx->Activate()) {	
+					Monster* occupied_mon = GetMonster(vfx->Tile());
+					if (occupied_mon) occupied_mon->Damage(3);
 				}
 				if (!vfx->Update()) {
 					delete vfx;

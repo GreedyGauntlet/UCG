@@ -4,7 +4,7 @@
 namespace UCG {
 	class Goblin : public Monster {
 	public:
-		virtual void Initialize(GameScene* context, Flora::Entity tile) override;
+		virtual void Initialize(BattleScene* context, TileRef tile) override;
 		virtual void StartTurn() override;
 		virtual void Attack() override;
 	};

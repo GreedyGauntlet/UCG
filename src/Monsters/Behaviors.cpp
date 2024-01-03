@@ -36,32 +36,32 @@ namespace UCG {
 					if (flags & ObjectSelectFlags::DIRECTIONAL) {
 						switch (subject.Status().Direction) {
 						case Orientation::DR:
-							if (tile.first == subject_tr.first && tile.second > subject_tr.second) {
+							if (tile.r == subject_tr.r && tile.c > subject_tr.c) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						case Orientation::UR:
-							if (tile.first < subject_tr.first && tile.second == subject_tr.second) {
+							if (tile.r < subject_tr.r && tile.c == subject_tr.c) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						case Orientation::UL:
-							if (tile.first == subject_tr.first && tile.second < subject_tr.second) {
+							if (tile.r == subject_tr.r && tile.c < subject_tr.c) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						default:
-							if (tile.first > subject_tr.first && tile.second == subject_tr.second) {
+							if (tile.r > subject_tr.r && tile.c == subject_tr.c) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;	
 						}
 					} else {
-						if (subject_tr.first == tile.first || subject_tr.second == tile.second) {
+						if (subject_tr.r == tile.r || subject_tr.c == tile.c) {
 							eval_targets.push_back(tile);	
 							continue;
 						}
@@ -69,29 +69,29 @@ namespace UCG {
 				}
 				
 				if (flags & ObjectSelectFlags::DIAGONAL) {
-					bool valid_diag = (tile.first - tile.second == subject_tr.first - subject_tr.second) || (tile.first + tile.second == subject_tr.first + subject_tr.second);
+					bool valid_diag = (tile.r - tile.c == subject_tr.r - subject_tr.c) || (tile.r + tile.c == subject_tr.r + subject_tr.c);
 					if (flags & ObjectSelectFlags::DIRECTIONAL) {
 						switch (subject.Status().Direction) {
 						case Orientation::DR:
-							if (tile.second > subject_tr.second && valid_diag) {
+							if (tile.c > subject_tr.c && valid_diag) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						case Orientation::UR:
-							if (tile.first < subject_tr.first && valid_diag) {
+							if (tile.r < subject_tr.r && valid_diag) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						case Orientation::UL:
-							if (tile.second < subject_tr.second && valid_diag) {
+							if (tile.c < subject_tr.c && valid_diag) {
 								eval_targets.push_back(tile);
 								continue;
 							}
 							break;
 						default:
-							if (tile.first > subject_tr.first && valid_diag) {
+							if (tile.r > subject_tr.r && valid_diag) {
 								eval_targets.push_back(tile);
 								continue;
 							}
@@ -115,8 +115,8 @@ namespace UCG {
 					int near_val = INT_MAX;
 					int far_val = -1;
 					for (auto tile : eval_targets) {
-						int a = subject_tr.first - tile.first;
-						int b = subject_tr.second - tile.second;
+						int a = subject_tr.r - tile.r;
+						int b = subject_tr.c - tile.c;
 						float distance = std::sqrt((a*a) + (b*b));
 						if (distance < near_val) {
 							near_val = distance;

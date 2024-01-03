@@ -4,12 +4,11 @@
 namespace UCG {
 	class Sanctuary : public VFX {
 	public:
-		virtual void Initialize(BattleScene* scene, Flora::Entity tile) override;
+		virtual void Initialize(BattleScene* scene, TileRef tile) override;
 		virtual bool TurnUpdate() override;
 		virtual void PersistantUpdate() override;
 	private:
-    bool m_PlayerAligned = true;
+    	bool m_PlayerAligned = true;
 		int m_Health = 5;
-		std::pair<int, int> m_TileCoords;
 	};
 }

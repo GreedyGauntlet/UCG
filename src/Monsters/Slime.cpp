@@ -1,16 +1,17 @@
 #include "Slime.h"
 #include "../Utils/FileUtils.h"
+#include "../Scenes/BattleScene.h"
 
 namespace UCG {
 
-	void Slime::Initialize(GameScene* context, Flora::Entity tile) {
+	void Slime::Initialize(BattleScene* context, TileRef tile) {
 		m_Status.MaxHealth = m_Status.Health = 3;
 		m_Context = context;
 		m_Body = m_Context->CreateEntity("Slime");
-		m_Tile = GetTileRef(tile);
+		m_Tile = tile;
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
-		tc.Translation = tile.GetComponent<Flora::TransformComponent>().Translation;
+		tc.Translation = context->GetTileObj(tile).second.GetComponent<Flora::TransformComponent>().Translation;
 		tc.Translation.y += 0.75f;
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
