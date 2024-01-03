@@ -1,6 +1,6 @@
 #pragma once
 #include "GameScene.h"
-#include "../Utils/BoardUtils.h"
+#include "../Core/Structures.h"
 #include "../Core/Player.h"
 #include "../Core/CardDictionary.h"
 
@@ -74,11 +74,12 @@ namespace UCG {
 		virtual void Stop() override;
 	public:
 		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardObjects.BoardTiles; }
-		bool ValidBoardCoord(int r, int c);
-		bool TileOccupied(int r, int c);
-		bool TileOccupied(TileRef tile) { return TileOccupied(tile.r, tile.c); }
-		Monster* GetMonster(int r, int c);
-		Monster* GetMonster(TileRef tile) { return GetMonster(tile.r, tile.c); }
+		bool ValidBoardCoord(TileRef tile);
+		bool ValidBoardCoord(Tile tile) { return ValidBoardCoord(tile.Coordinates); }
+		bool TileOccupied(TileRef tile);
+		bool TileOccupied(Tile tile) { return TileOccupied(tile.Coordinates); }
+		Monster* GetMonster(TileRef tile);
+		Monster* GetMonster(Tile tile) { return GetMonster(tile.Coordinates); }
 		TileRef GetTileRef(Flora::Entity tile);
 		TileObj GetTileObj(TileRef tile) { return m_BoardObjects.BoardTiles[tile.r][tile.c]; }
 	private:
@@ -95,11 +96,12 @@ namespace UCG {
 		void UpdateSpell();
 	private:
 		void DeepTint(Flora::Entity tile, glm::vec4 color);
-		void ResetBoard(const Board board);
+		void ResetBoard(const Blueprint board);
 		void CleanBoard();
 		void DeleteBoard();
 		void UpdateBoard(Flora::Timestep ts);
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
+		TileObj MakeTile(char id);
 	private:
 		std::vector<TileObj> NexusWorkingSet(bool playernexus = true, int radius = 2);
 	private:

@@ -2,6 +2,14 @@
 #include "Flora/Scene/Entity.h"
 
 namespace UCG {
+	
+	class Building;
+
+	enum class TileTypes {
+		DIRT,
+		WATER,
+	};
+
 	struct TileRef {
 		int r;
 		int c;
@@ -15,18 +23,18 @@ namespace UCG {
     	}
 	};
 
-	/*
 	struct TileObj {
-		Flora::Entity Building;
+		Building* Physical;
 		Flora::Entity Body;
 	};
-/*
+
 	struct Tile	{
 		TileRef Coordinates;
 		TileObj Contents;
+		TileTypes Type;
 	};
-
-	typedef std::vector<> TileSet;
+/*
+	typedef std::vector<> TileSet;*/
 	typedef std::vector<std::vector<char>> Blueprint;
-	typedef std::vector<std::vector<Tile>> Board*/
+	typedef std::vector<std::vector<Tile>> Board;
 }
