@@ -71,14 +71,14 @@ namespace UCG {
 					else {
 						if (flags & TileSelectFlags::OCCUPIED) {
 							for (auto monster : m_BoardObjects.Monsters)
-								if (monster->Tile() == m_BoardObjects.Tiles[r][c].Contents.Body) {
+								if (monster->GetTile().Coordinates == TileRef{r, c}) {
 									valid = true;
 									break;
 								}
 						} else if (flags & TileSelectFlags::UNOCCUPIED) {
 							valid = true;
 							for (auto monster : m_BoardObjects.Monsters)
-								if (monster->Tile() == m_BoardObjects.Tiles[r][c].Contents.Body) {
+								if (monster->GetTile().Coordinates == TileRef{r, c}) {
 									valid = false;
 									break;
 								}
@@ -197,7 +197,7 @@ namespace UCG {
 
 	Monster* BattleScene::GetMonster(TileRef tile) {
 		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++)
-			if ((uint32_t)(m_BoardObjects.Monsters[i]->Tile()) == (uint32_t)(m_BoardObjects.Tiles[tile.r][tile.c].Contents.Body))
+			if (m_BoardObjects.Monsters[i]->GetTile().Coordinates == tile)
 				return m_BoardObjects.Monsters[i];
 		return nullptr;
 	}
@@ -700,7 +700,7 @@ namespace UCG {
 				}, (TileSelectFlag)TileSelectFlags::OCCUPIED)) ENDSPELL();
 			} else {
 				if (vfx->Activate()) {
-					Monster* occupied_mon = GetMonster(vfx->Tile());
+					Monster* occupied_mon = GetMonster(vfx->GetTile());
 					if (occupied_mon) occupied_mon->Damage(1);
 				}
 				if (!vfx->Update()) {
@@ -738,7 +738,7 @@ namespace UCG {
 			}
 			else {
 				if (vfx->Activate()) {	
-					Monster* occupied_mon = GetMonster(vfx->Tile());
+					Monster* occupied_mon = GetMonster(vfx->GetTile());
 					if (occupied_mon) occupied_mon->Damage(3);
 				}
 				if (!vfx->Update()) {

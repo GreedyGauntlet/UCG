@@ -95,8 +95,7 @@ namespace UCG {
 	public:
 		Flora::Entity Body() { return m_Body; }
 		bool Alive() { return !m_Status.Dead; }
-		Flora::Entity Tile();
-		Flora::Entity Tile(TileRef ref);
+		Tile GetTile();
 		TileRef GetTileRef() { return m_Tile; }
 		void Prime() { m_Primed = true; }
 		MonsterStatus Status() { return m_Status; }

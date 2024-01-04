@@ -32,6 +32,7 @@ namespace UCG {
 		TileRef Coordinates;
 		TileObj Contents;
 		TileTypes Type;
+		glm::vec3 Translation() { return Contents.Body.GetComponent<Flora::TransformComponent>().Translation; }
 	};
 
 	typedef std::vector<Tile> TileSet;

@@ -264,9 +264,9 @@ namespace UCG {
 		float stable_ts = m_ActionQueue.ActionTime > m_ActionQueue.TimeThreshold ? (ts - (m_ActionQueue.ActionTime - m_ActionQueue.TimeThreshold)) : (float)ts;
 
 		glm::vec3 move_vec =
-			((((BattleScene*)m_Context)->GetTiles()[nextTile.r][nextTile.c].Contents.Body.GetComponent<Flora::TransformComponent>().Translation
+			((((BattleScene*)m_Context)->GetTiles()[nextTile.r][nextTile.c].Translation()
 			-
-			((BattleScene*)m_Context)->GetTiles()[m_Tile.r][m_Tile.c].Contents.Body.GetComponent<Flora::TransformComponent>().Translation)
+			((BattleScene*)m_Context)->GetTiles()[m_Tile.r][m_Tile.c].Translation())
 			/ 
 			m_ActionQueue.TimeThreshold)
 			*
@@ -385,12 +385,8 @@ namespace UCG {
 			OverrideAnimation({ AnimationState::IDLE, m_Status.Direction });
 	}
 
-	Flora::Entity Monster::Tile() {
-		return Tile(m_Tile);
-	}
-
-	Flora::Entity Monster::Tile(TileRef ref) {
-		return ((BattleScene*)m_Context)->GetTiles()[ref.r][ref.c].Contents.Body;
-	}
+	Tile Monster::GetTile() {
+		return m_Context->GetTile(m_Tile);
+	}	
 
 }

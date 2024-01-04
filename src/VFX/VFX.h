@@ -15,7 +15,7 @@ namespace UCG {
 		virtual void PersistantUpdate() {};
 		virtual void Kill();
 	public:
-		TileRef Tile() { return m_Tile; }
+		Tile GetTile() { return m_Scene->GetTile(m_Tile); }
 	protected:
 		Flora::Entity m_VFX;
 		TileRef m_Tile;

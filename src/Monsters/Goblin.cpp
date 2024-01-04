@@ -13,7 +13,7 @@ namespace UCG {
 		m_Tile = tile;
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
-		tc.Translation = m_Context->GetTile(tile).Contents.Body.GetComponent<Flora::TransformComponent>().Translation;
+		tc.Translation = m_Context->GetTile(tile).Translation();
 		tc.Translation.y += 0.75f;
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };
@@ -81,7 +81,7 @@ namespace UCG {
 			return;
 		}
 		if (m_Context->ValidBoardCoord(nexttile) &&
-			Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D" &&
+			m_Context->GetTile(nexttile).Contents.Body.GetComponent<Flora::TagComponent>().Tag == "D" &&
 			!(m_Context->TileOccupied(nexttile))) {
 			PushAction(Action::MOVE);
 			PushAction(Action::IDLE);
@@ -105,7 +105,7 @@ namespace UCG {
 				return;
 			}
 			if (m_Context->ValidBoardCoord(nexttile) &&
-				Tile(nexttile).GetComponent<Flora::TagComponent>().Tag == "D" &&
+				m_Context->GetTile(nexttile).Contents.Body.GetComponent<Flora::TagComponent>().Tag == "D" &&
 				!(m_Context)->TileOccupied(nexttile)) {
 				PushAction(Action::MOVE);
 				PushAction(Action::IDLE);
