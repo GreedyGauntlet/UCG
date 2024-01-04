@@ -34,7 +34,14 @@ namespace UCG {
 		TileTypes Type;
 	};
 /*
-	typedef std::vector<> TileSet;*/
+	typedef std::vector<Tile> TileSet;
+	typedef std::vector<TileRef> CoordinateSet*/
 	typedef std::vector<std::vector<char>> Blueprint;
 	typedef std::vector<std::vector<Tile>> Board;
+
+	struct Map {
+		Blueprint Terrain;
+		Blueprint Buildings;
+	};
+
 }

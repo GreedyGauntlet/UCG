@@ -8,8 +8,8 @@ namespace UCG {
 		TileSet targets;
 		TileSet workingset;
 		if (included.size() <= 0) {
-			int rows = (int)(context->GetBoardTiles().size());
-			int cols = (int)(context->GetBoardTiles()[0].size());
+			int rows = (int)(context->GetTiles().size());
+			int cols = (int)(context->GetTiles()[0].size());
 			for (int r = 0; r < rows; r++)
 				for (int c = 0; c < cols; c++)
 					workingset.push_back({r, c});

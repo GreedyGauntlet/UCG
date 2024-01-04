@@ -13,7 +13,7 @@ namespace UCG {
 		m_Tile = tile;
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
-		tc.Translation = m_Context->GetTileObj(tile).Body.GetComponent<Flora::TransformComponent>().Translation;
+		tc.Translation = m_Context->GetTile(tile).Contents.Body.GetComponent<Flora::TransformComponent>().Translation;
 		tc.Translation.y += 0.75f;
 		tc.Translation.z = 3.0f;
 		tc.Scale = { 1.0f, 2.0f, 1.0f };

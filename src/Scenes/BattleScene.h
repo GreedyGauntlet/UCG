@@ -14,7 +14,7 @@ namespace UCG {
 	struct BoardObjects {
 		Flora::Entity PlayerNexus;
 		Flora::Entity OpponentNexus;
-		std::vector<std::vector<TileObj>> BoardTiles;
+		Board Tiles;
 		std::vector<Monster*> Monsters;
 		std::vector<VFX*> VFXs;
 	};
@@ -73,7 +73,7 @@ namespace UCG {
 		virtual void Update(Flora::Timestep ts) override;
 		virtual void Stop() override;
 	public:
-		std::vector<std::vector<TileObj>> GetBoardTiles() { return m_BoardObjects.BoardTiles; }
+		Board GetTiles() { return m_BoardObjects.Tiles; }
 		bool ValidBoardCoord(TileRef tile);
 		bool ValidBoardCoord(Tile tile) { return ValidBoardCoord(tile.Coordinates); }
 		bool TileOccupied(TileRef tile);
@@ -81,7 +81,8 @@ namespace UCG {
 		Monster* GetMonster(TileRef tile);
 		Monster* GetMonster(Tile tile) { return GetMonster(tile.Coordinates); }
 		TileRef GetTileRef(Flora::Entity tile);
-		TileObj GetTileObj(TileRef tile) { return m_BoardObjects.BoardTiles[tile.r][tile.c]; }
+		Tile GetTile(TileRef tile) { return m_BoardObjects.Tiles[tile.r][tile.c]; }
+		Tile GetTile(Flora::Entity tile) { return GetTile(GetTileRef(tile)); }
 	private:
 		void CreateUI();
 		void UpdateUI();
@@ -96,12 +97,12 @@ namespace UCG {
 		void UpdateSpell();
 	private:
 		void DeepTint(Flora::Entity tile, glm::vec4 color);
-		void ResetBoard(const Blueprint board);
+		void ResetBoard(const Map map);
 		void CleanBoard();
 		void DeleteBoard();
 		void UpdateBoard(Flora::Timestep ts);
 		bool TileCollision(Flora::Entity tile, glm::vec2 translation);
-		TileObj MakeTile(char id);
+		Tile MakeTile(TileRef coordinate, Map map);
 	private:
 		std::vector<TileObj> NexusWorkingSet(bool playernexus = true, int radius = 2);
 	private:

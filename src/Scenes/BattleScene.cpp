@@ -51,13 +51,13 @@ namespace UCG {
 	template<typename SelectFunction>
 	bool BattleScene::SelectTile(bool trigger, std::vector<TileObj> workingset, SelectFunction selectfunc, TileSelectFlag flags) {
 		glm::vec2 tr = MouseCoordinates();
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.Tiles.size(); c++) {
 				bool valid = workingset.size() == 0;
 
 				if (!valid) {
 					for (TileObj obj : workingset) {
-						if ((uint32_t)m_BoardObjects.BoardTiles[r][c].Body == (uint32_t)obj.Body) {
+						if ((uint32_t)m_BoardObjects.Tiles[r][c].Contents.Body == (uint32_t)obj.Body) {
 							valid = true;
 							break;
 						}
@@ -71,14 +71,14 @@ namespace UCG {
 					else {
 						if (flags & TileSelectFlags::OCCUPIED) {
 							for (auto monster : m_BoardObjects.Monsters)
-								if (monster->Tile() == m_BoardObjects.BoardTiles[r][c].Body) {
+								if (monster->Tile() == m_BoardObjects.Tiles[r][c].Contents.Body) {
 									valid = true;
 									break;
 								}
 						} else if (flags & TileSelectFlags::UNOCCUPIED) {
 							valid = true;
 							for (auto monster : m_BoardObjects.Monsters)
-								if (monster->Tile() == m_BoardObjects.BoardTiles[r][c].Body) {
+								if (monster->Tile() == m_BoardObjects.Tiles[r][c].Contents.Body) {
 									valid = false;
 									break;
 								}
@@ -91,43 +91,43 @@ namespace UCG {
 
 							if (flags & TileSelectFlags::DIRT) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'D')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'D')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::FOREST) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'F')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'F')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::MOUNTAIN) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'M')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'M')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::PLAYER) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'P')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'P')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::OPPONENT) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'O')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'O')
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::NEXUS) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Physical->Type() == BuildingType::NEXUS)
+								if (m_BoardObjects.Tiles[r][c].Contents.Physical->Type() == BuildingType::NEXUS)
 									valid = true;
 							}
 
 							if (flags & TileSelectFlags::WATER) {
 								specified = true;
-								if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag[0] == 'W')
+								if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag[0] == 'W')
 									valid = true;
 							}
 
@@ -137,8 +137,8 @@ namespace UCG {
 				}
 
 				if (valid) {
-					if (TileCollision(m_BoardObjects.BoardTiles[r][c].Body, tr)) {
-						DeepTint(m_BoardObjects.BoardTiles[r][c].Body, { 2.0f, 2.0f, 1.0f, 1.0f });
+					if (TileCollision(m_BoardObjects.Tiles[r][c].Contents.Body, tr)) {
+						DeepTint(m_BoardObjects.Tiles[r][c].Contents.Body, { 2.0f, 2.0f, 1.0f, 1.0f });
 						if (trigger) {
 							TileRef ref = {r, c};
 							selectfunc(this, ref);
@@ -146,9 +146,9 @@ namespace UCG {
 							return true;
 						}
 					}
-					else DeepTint(m_BoardObjects.BoardTiles[r][c].Body, { 0.2f, 0.9f, 0.2f, 1.0f });
+					else DeepTint(m_BoardObjects.Tiles[r][c].Contents.Body, { 0.2f, 0.9f, 0.2f, 1.0f });
 				}
-				else DeepTint(m_BoardObjects.BoardTiles[r][c].Body, { 0.9f, 0.2f, 0.2f, 1.0f });
+				else DeepTint(m_BoardObjects.Tiles[r][c].Contents.Body, { 0.9f, 0.2f, 0.2f, 1.0f });
 			}
 		}
 		if (trigger) return false;
@@ -158,7 +158,7 @@ namespace UCG {
 	void BattleScene::Start() {
 		OnRuntimeStart();
 		CreateUI();
-		ResetBoard(test_map);
+		ResetBoard({test_map, test_map_buildings});
 		DrawHand();
 		m_Camera = SceneUtils::MainCamera();
 		m_BoardObjects.Monsters.clear();
@@ -197,15 +197,15 @@ namespace UCG {
 
 	Monster* BattleScene::GetMonster(TileRef tile) {
 		for (int i = 0; i < (int)m_BoardObjects.Monsters.size(); i++)
-			if ((uint32_t)(m_BoardObjects.Monsters[i]->Tile()) == (uint32_t)(m_BoardObjects.BoardTiles[tile.r][tile.c].Body))
+			if ((uint32_t)(m_BoardObjects.Monsters[i]->Tile()) == (uint32_t)(m_BoardObjects.Tiles[tile.r][tile.c].Contents.Body))
 				return m_BoardObjects.Monsters[i];
 		return nullptr;
 	}
 
 	TileRef BattleScene::GetTileRef(Flora::Entity tile) {
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++)
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++)
-				if (m_BoardObjects.BoardTiles[r][c].Body == tile)
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++)
+			for (int c = 0; c < (int)m_BoardObjects.Tiles[0].size(); c++)
+				if (m_BoardObjects.Tiles[r][c].Contents.Body == tile)
 					return {r, c};
 		return {-1, -1};
 	}
@@ -231,43 +231,43 @@ namespace UCG {
 		}
 	}
 
-	void BattleScene::ResetBoard(const Blueprint board) {
+	void BattleScene::ResetBoard(const Map map) {
 		DeleteBoard();
-		int b_width = board.size();
-		int b_height = board[0].size();
+		int b_width = map.Terrain.size();
+		int b_height = map.Terrain[0].size();
 		glm::vec3 map_origin = { 0.0f, 2.0f, -1.0f };
 		for (int r = 0; r < b_width; r++) {
-			std::vector<TileObj> row;
+			std::vector<Tile> row;
 			for (int c = 0; c < b_height; c++) {
-				TileObj tile = MakeTile(board[r][c]);
-				tile.Body.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
+				Tile tile = MakeTile({r, c}, map);
+				tile.Contents.Body.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
-				if (board[r][c] == 'P') m_BoardObjects.PlayerNexus = tile.Body;
-				else if (board[r][c] == 'O') m_BoardObjects.OpponentNexus = tile.Body;
+				if (map.Buildings[r][c] == 'P') m_BoardObjects.PlayerNexus = tile.Contents.Body;
+				else if (map.Buildings[r][c] == 'O') m_BoardObjects.OpponentNexus = tile.Contents.Body;
 			}
-			m_BoardObjects.BoardTiles.push_back(row);
+			m_BoardObjects.Tiles.push_back(row);
 		}
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
-				m_BoardObjects.BoardTiles[r][c].Physical->Initialize(this, m_BoardObjects.BoardTiles[r][c].Body);
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.Tiles.size(); c++) {
+				m_BoardObjects.Tiles[r][c].Contents.Physical->Initialize(this, m_BoardObjects.Tiles[r][c].Contents.Body);
 			}
 		}
 	}
 
 	void BattleScene::DeleteBoard() {
-		for (int i = 0; i < (int)m_BoardObjects.BoardTiles.size(); i++) {
-			for (int j = 0; j < (int)m_BoardObjects.BoardTiles.size(); j++) {
-				DestroyEntity(m_BoardObjects.BoardTiles[i][j].Body);
-				delete m_BoardObjects.BoardTiles[i][j].Physical;
+		for (int i = 0; i < (int)m_BoardObjects.Tiles.size(); i++) {
+			for (int j = 0; j < (int)m_BoardObjects.Tiles[0].size(); j++) {
+				DestroyEntity(m_BoardObjects.Tiles[i][j].Contents.Body);
+				delete m_BoardObjects.Tiles[i][j].Contents.Physical;
 			}
 		}
-		m_BoardObjects.BoardTiles.clear();
+		m_BoardObjects.Tiles.clear();
 	}
 
 	void BattleScene::UpdateBoard(Flora::Timestep ts) {
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++) {
-				m_BoardObjects.BoardTiles[r][c].Physical->Update(ts);
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.Tiles[0].size(); c++) {
+				m_BoardObjects.Tiles[r][c].Contents.Physical->Update(ts);
 			}
 		}
 	}
@@ -292,17 +292,29 @@ namespace UCG {
 		return false;
 	}
 
-	TileObj BattleScene::MakeTile(char id) {
+	Tile BattleScene::MakeTile(TileRef coordinates, Map map) {
 		std::string tilename = " ";
-		tilename[0] = id;
+		tilename[0] = map.Buildings[coordinates.r][coordinates.c] == 'E' ? map.Terrain[coordinates.r][coordinates.c] : map.Buildings[coordinates.r][coordinates.c];
 		Flora::Entity tile = CreateEntity(tilename);
 		Building* building = new Building();
 		building->SetType(BuildingType::EMPTY);
 		Flora::SpriteRendererComponent& src = tile.AddComponent<Flora::SpriteRendererComponent>();
-		switch (id) {
+		TileTypes type;
+		switch (map.Terrain[coordinates.r][coordinates.c]) {
 		case 'D':
 			src.Path = UCG::FileUtils::Path("assets/Tiles/Dirt.png");
+			type = TileTypes::DIRT;
 			break;
+		case 'W':
+			src.Path = UCG::FileUtils::Path("assets/Tiles/Water.png");
+			type = TileTypes::WATER;
+			break;
+		default:
+			src.Path = "invalid.png";
+			type = TileTypes::DIRT;
+			break;
+		}
+		switch (map.Buildings[coordinates.r][coordinates.c]) {
 		case 'P':
 			src.Path = UCG::FileUtils::Path("assets/Tiles/Player.png");
 			building->SetType(BuildingType::NEXUS);
@@ -319,16 +331,12 @@ namespace UCG {
 			src.Path = UCG::FileUtils::Path("assets/Tiles/Mountain.png");
 			building->SetType(BuildingType::MOUNTAIN);
 			break;
-		case 'W':
-			src.Path = UCG::FileUtils::Path("assets/Tiles/Water.png");
-			break;
 		default:
-			src.Path = "invalid";
 			break;
 		}
 		building->Initialize(this, tile);
-		tile.AddComponent<Flora::ChildComponent>().AddChild(building->Body());
-		return { building, tile };
+		TileObj contents = { building, tile};
+		return { coordinates, contents, type };
 	}
 
 	void BattleScene::DrawHand() {
@@ -554,9 +562,9 @@ namespace UCG {
 	void BattleScene::DevCall() {
 		if (false) {
 			if (HoveredEntity() >= 0) {
-				for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++)
-					for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++)
-						if ((uint32_t)HoveredEntity() == (uint32_t)(m_BoardObjects.BoardTiles[r][c].Body))
+				for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++)
+					for (int c = 0; c < (int)m_BoardObjects.Tiles[0].size(); c++)
+						if ((uint32_t)HoveredEntity() == (uint32_t)(m_BoardObjects.Tiles[r][c].Contents.Body))
 							FL_CORE_INFO("r: {}, c: {}", r, c);
 			}
 		}
@@ -621,17 +629,17 @@ namespace UCG {
 	}
 
 	void BattleScene::CleanBoard() {
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles.size(); c++) {
-				DeepTint(m_BoardObjects.BoardTiles[r][c].Body, glm::vec4(1.0f));
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.Tiles.size(); c++) {
+				DeepTint(m_BoardObjects.Tiles[r][c].Contents.Body, glm::vec4(1.0f));
 			}
 		}
 	}
 
 	bool BattleScene::ValidBoardCoord(TileRef tile) {
-		if (tile.r >= (int)m_BoardObjects.BoardTiles.size()) return false;
+		if (tile.r >= (int)m_BoardObjects.Tiles.size()) return false;
 		if (tile.r < 0) return false;
-		if (tile.c >= (int)m_BoardObjects.BoardTiles[0].size()) return false;
+		if (tile.c >= (int)m_BoardObjects.Tiles[0].size()) return false;
 		if (tile.c < 0) return false;
 		return true;
 	}
@@ -640,9 +648,9 @@ namespace UCG {
 		std::string tilestr = playernexus ? "P" : "O";
 		int row = 0;
 		int col = 0;
-		for (int r = 0; r < (int)m_BoardObjects.BoardTiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.BoardTiles[0].size(); c++) {
-				if (m_BoardObjects.BoardTiles[r][c].Body.GetComponent<Flora::TagComponent>().Tag == tilestr) {
+		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
+			for (int c = 0; c < (int)m_BoardObjects.Tiles[0].size(); c++) {
+				if (m_BoardObjects.Tiles[r][c].Contents.Body.GetComponent<Flora::TagComponent>().Tag == tilestr) {
 					row = r;
 					col = c;
 					break;
@@ -653,7 +661,7 @@ namespace UCG {
 		for (int r = -1 * radius; r <= radius; r++) {
 			for (int c = -1 * radius; c <= radius; c++) {
 				if (ValidBoardCoord(TileRef{row + r, col + c})) {
-					workingset.push_back(m_BoardObjects.BoardTiles[row + r][col + c]);
+					workingset.push_back(m_BoardObjects.Tiles[row + r][col + c].Contents);
 				}
 			}
 		}

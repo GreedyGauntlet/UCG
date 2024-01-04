@@ -14,7 +14,8 @@ namespace UCG {
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
 		tc.Translation.z = 0.01f;
-
+		if (!tile.HasComponent<Flora::ChildComponent>()) tile.AddComponent<Flora::ChildComponent>();
+		tile.GetComponent<Flora::ChildComponent>().AddChild(m_Body);
 		src.Path = tile.GetComponent<Flora::SpriteRendererComponent>().Path;
 		src.Color = glm::vec4(0.0f);
 	}
