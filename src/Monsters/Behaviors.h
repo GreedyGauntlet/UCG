@@ -3,8 +3,6 @@
 #include "../Scenes/BattleScene.h"
 
 namespace UCG {
-	typedef std::vector<TileRef> TileSet;
-
 	enum ObjectSelectFlags {
 		FRIENDLYFIRE   = 1 << 0,
 		NEAR           = 1 << 1,
@@ -17,6 +15,6 @@ namespace UCG {
 
 	class Behaviors {
 	public:
-		static TileSet Target(BattleScene* context, Monster& subject, ObjectSelectFlags flags, uint32_t numTargets = 1, const TileSet& included = TileSet());
+		static CoordinateSet Target(BattleScene* context, Monster& subject, ObjectSelectFlags flags, uint32_t numTargets = 1, const CoordinateSet& included = CoordinateSet());
 	};
 }

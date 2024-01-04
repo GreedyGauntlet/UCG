@@ -40,9 +40,9 @@ namespace UCG {
 
 	void Goblin::StartTurn() {
 		TileRef nexttile = FrontTile();
-		TileSet los;
+		CoordinateSet los;
 		los.push_back(nexttile);
-		TileSet targets = Behaviors::Target(m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+		CoordinateSet targets = Behaviors::Target(m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
 		if (targets.size() > 0) {
 			PushAction(Action::ATTACK);
 			PushAction(Action::IDLE);

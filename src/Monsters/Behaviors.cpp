@@ -3,10 +3,10 @@
 
 namespace UCG {
   
-	TileSet Behaviors::Target(BattleScene* context, Monster& subject, ObjectSelectFlags flags, uint32_t numTargets, const TileSet& included) {
+	CoordinateSet Behaviors::Target(BattleScene* context, Monster& subject, ObjectSelectFlags flags, uint32_t numTargets, const CoordinateSet& included) {
 		TileRef subject_tr = subject.GetTileRef();
-		TileSet targets;
-		TileSet workingset;
+		CoordinateSet targets;
+		CoordinateSet workingset;
 		if (included.size() <= 0) {
 			int rows = (int)(context->GetTiles().size());
 			int cols = (int)(context->GetTiles()[0].size());
@@ -19,7 +19,7 @@ namespace UCG {
 		excluded.insert(subject_tr);
 
 		while (targets.size() < numTargets) {
-			TileSet eval_targets;
+			CoordinateSet eval_targets;
 			for (auto tile : workingset) {
 				if (excluded.find(tile) != excluded.end()) continue;
 				
