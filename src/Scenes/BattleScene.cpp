@@ -740,6 +740,7 @@ namespace UCG {
 				if (vfx->Activate()) {	
 					Monster* occupied_mon = GetMonster(vfx->GetTile());
 					if (occupied_mon) occupied_mon->Damage(3);
+					else if (vfx->GetTile().Contents.Physical->Type() != BuildingType::EMPTY) vfx->GetTile().Contents.Physical->Damage(1);
 				}
 				if (!vfx->Update()) {
 					delete vfx;
