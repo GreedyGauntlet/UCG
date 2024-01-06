@@ -13,7 +13,7 @@ namespace UCG {
 		m_Body.AddComponent<Flora::ParentComponent>().Parent = tile;
 		Flora::SpriteRendererComponent& src = m_Body.AddComponent<Flora::SpriteRendererComponent>();
 		Flora::TransformComponent& tc = m_Body.GetComponent<Flora::TransformComponent>();
-		tc.Translation.z = 0.01f;
+		tc.Translation.z = 0.0001f;
 		if (!tile.HasComponent<Flora::ChildComponent>()) tile.AddComponent<Flora::ChildComponent>();
 		tile.GetComponent<Flora::ChildComponent>().AddChild(m_Body);
 		src.Path = tile.GetComponent<Flora::SpriteRendererComponent>().Path;
