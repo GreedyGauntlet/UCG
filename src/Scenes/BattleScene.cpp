@@ -7,7 +7,7 @@
 #include "../Utils/LayerUtils.h"
 #include "../VFX/VFXCore.h"
 #include "../Monsters/MonsterCore.h"
-#include "../Buildings/Building.h"
+#include "../Buildings/BuildingCore.h"
 #include "../Utils/FileUtils.h"
 
 namespace UCG {
@@ -247,11 +247,6 @@ namespace UCG {
 			}
 			m_BoardObjects.Tiles.push_back(row);
 		}
-		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++) {
-			for (int c = 0; c < (int)m_BoardObjects.Tiles.size(); c++) {
-				m_BoardObjects.Tiles[r][c].Contents.Physical->Initialize(this, m_BoardObjects.Tiles[r][c].Contents.Body);
-			}
-		}
 	}
 
 	void BattleScene::DeleteBoard() {
@@ -324,8 +319,7 @@ namespace UCG {
 			building->SetType(BuildingType::NEXUS);
 			break;
 		case 'F':
-			src.Path = UCG::FileUtils::Path("assets/Tiles/Forest.png");
-			building->SetType(BuildingType::FOREST);
+			building = new Forest();
 			break;
 		case 'M':
 			src.Path = UCG::FileUtils::Path("assets/Tiles/Mountain.png");

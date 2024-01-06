@@ -17,7 +17,7 @@ namespace UCG {
 	public:
 		void SetType(BuildingType type);
 		BuildingType Type() { return m_Type; }
-	private:
+	protected:
 		bool m_SoftInit = false;
 		BuildingType m_Type;
 		Flora::Entity m_TileBody;
