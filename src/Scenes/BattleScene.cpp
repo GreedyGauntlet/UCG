@@ -310,23 +310,11 @@ namespace UCG {
 			break;
 		}
 		switch (map.Buildings[coordinates.r][coordinates.c]) {
-		case 'P':
-			src.Path = UCG::FileUtils::Path("assets/Tiles/Player.png");
-			building->SetType(BuildingType::NEXUS);
-			break;
-		case 'O':
-			src.Path = UCG::FileUtils::Path("assets/Tiles/Opponent.png");
-			building->SetType(BuildingType::NEXUS);
-			break;
-		case 'F':
-			building = new Forest();
-			break;
-		case 'M':
-			src.Path = UCG::FileUtils::Path("assets/Tiles/Mountain.png");
-			building = new Mountain();
-			break;
-		default:
-			break;
+		case 'P': building = new Nexus(NexusAlignment::PLAYER); break;
+		case 'O': building = new Nexus(NexusAlignment::OPPONENT); break;
+		case 'F': building = new Forest(); break;
+		case 'M': building = new Mountain(); break;
+		default: break;
 		}
 		building->Initialize(this, tile);
 		TileObj contents = { building, tile};
