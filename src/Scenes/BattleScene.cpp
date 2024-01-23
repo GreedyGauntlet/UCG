@@ -323,7 +323,7 @@ namespace UCG {
 			break;
 		case 'M':
 			src.Path = UCG::FileUtils::Path("assets/Tiles/Mountain.png");
-			building->SetType(BuildingType::MOUNTAIN);
+			building = new Mountain();
 			break;
 		default:
 			break;
@@ -749,7 +749,7 @@ namespace UCG {
 				m_BoardObjects.VFXs[m_BoardObjects.VFXs.size() - 1]->Initialize(scene_context, tile);
 				ConsumeCard();
 				ENDSPELL();
-			}, (TileSelectFlag)(TileSelectFlags::DIRT | TileSelectFlags::FOREST | TileSelectFlags::MOUNTAIN | TileSelectFlags::WATER))) ENDSPELL();
+			}, (TileSelectFlag)(TileSelectFlags::DIRT))) ENDSPELL();
 			break;
 		default:
 			break;
