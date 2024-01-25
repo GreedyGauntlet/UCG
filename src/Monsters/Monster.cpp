@@ -12,7 +12,7 @@ namespace UCG {
 		m_Status.Dead = true;
 	}
 
-	void Monster::Damage(int damage) {
+	void Monster::Damage(int damage, DamageTypes type) {
 		m_Status.Health -= damage;
 		m_Status.Damaged = true;
 		m_Status.RelativeTime = 0.0f;

@@ -39,6 +39,17 @@ namespace UCG {
 		OPPONENT,
 	};
 
+	enum class DamageTypes {
+		NONE,
+		FIRE,
+		WATER,
+		EARTH,
+		LIGHTNING,
+		WIND,
+		DARK,
+		LIGHT,
+	};
+
 	typedef std::tuple<int, int, int> Animation; // start frame, end frame, fps
 	typedef std::tuple<AnimationState, Orientation> AnimationCommand;
 
@@ -91,7 +102,7 @@ namespace UCG {
 		virtual ~Monster() = default;
 		virtual void Update(Flora::Timestep ts);
 		virtual void Destroy();
-		virtual void Damage(int damage);
+		virtual void Damage(int damage, DamageTypes type = DamageTypes::NONE);
 	public:
 		Flora::Entity Body() { return m_Body; }
 		bool Alive() { return !m_Status.Dead; }
