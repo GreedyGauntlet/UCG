@@ -754,9 +754,6 @@ namespace UCG {
 
 //NEXT:
 /*
-- damange types
-- meteor card that does what smite does right now, but can burn forests and break mountains (implement objects (not monsters but damageable)
-- integrate monsters killing nexus (nexus is technically a monster object!)
 - redo health, mana, player border
 - enemy border and health/mana
 - integrate turns
