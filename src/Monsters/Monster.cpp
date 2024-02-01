@@ -4,6 +4,7 @@
 #include "Flora/Renderer/Renderer2D.h"
 #include "Flora/Utils/ComponentUtils.h"
 #include "../Scenes/BattleScene.h"
+#include <cmath>
 
 namespace UCG {
 
@@ -13,9 +14,16 @@ namespace UCG {
 	}
 
 	void Monster::Damage(int damage, DamageTypes type) {
+		for (DamageModifier mod : m_Status.Weaknesses)
+			if (type == std::get<0>(mod))
+				damage = floor(damage * std::get<1>(mod));
 		m_Status.Health -= damage;
 		m_Status.Damaged = true;
 		m_Status.RelativeTime = 0.0f;
+	}
+
+	void Monster::AddWeakness(DamageModifier mod) {
+		m_Status.Weaknesses.push_back(mod);
 	}
 
 	void Monster::Update(Flora::Timestep ts) {

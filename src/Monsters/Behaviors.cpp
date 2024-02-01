@@ -22,6 +22,22 @@ namespace UCG {
 			CoordinateSet eval_targets;
 			for (auto tile : workingset) {
 				if (excluded.find(tile) != excluded.end()) continue;
+
+				if (flags & ObjectSelectFlags::NEXUSTILE) {
+					if (tile == context->GetPlayerNexus() || tile == context->GetOpponentNexus()) {
+						bool targetable_nexus = false;
+						if (flags & ObjectSelectFlags::FRIENDLYFIRE || subject.GetAllegiance() == Allegiances::NONE) {
+							targetable_nexus = true;
+						} else {
+							if (subject.GetAllegiance() == Allegiances::PLAYER && tile == context->GetOpponentNexus()) targetable_nexus = true;
+							else if (subject.GetAllegiance() == Allegiances::OPPONENT && tile == context->GetPlayerNexus()) targetable_nexus = true;
+						}
+						if (targetable_nexus) {
+							eval_targets.push_back(tile);
+							continue;
+						}
+					}
+				}
 				
 				if (!(flags & ObjectSelectFlags::EMPTY)) {
 					bool viable = context->TileOccupied(tile);

@@ -202,6 +202,11 @@ namespace UCG {
 		return nullptr;
 	}
 
+	Monster* BattleScene::GetTarget(TileRef tile) {
+		if (GetTile(tile).Contents.Physical->Type() != BuildingType::EMPTY) return GetTile(tile).Contents.Physical;
+		return GetMonster(tile);
+	}
+
 	TileRef BattleScene::GetTileRef(Flora::Entity tile) {
 		for (int r = 0; r < (int)m_BoardObjects.Tiles.size(); r++)
 			for (int c = 0; c < (int)m_BoardObjects.Tiles[0].size(); c++)
@@ -242,8 +247,8 @@ namespace UCG {
 				Tile tile = MakeTile({r, c}, map);
 				tile.Contents.Body.GetComponent<Flora::TransformComponent>().Translation = map_origin + glm::vec3(-0.5f * r + (0.5f * c), -0.25f * c - (0.25f * r), 0.001f * (r + c));
 				row.push_back(tile);
-				if (map.Buildings[r][c] == 'P') m_BoardObjects.PlayerNexus = tile.Contents.Body;
-				else if (map.Buildings[r][c] == 'O') m_BoardObjects.OpponentNexus = tile.Contents.Body;
+				if (map.Buildings[r][c] == 'P') m_BoardObjects.PlayerNexus = tile.Coordinates;
+				else if (map.Buildings[r][c] == 'O') m_BoardObjects.OpponentNexus = tile.Coordinates;
 			}
 			m_BoardObjects.Tiles.push_back(row);
 		}
@@ -683,7 +688,7 @@ namespace UCG {
 			} else {
 				if (vfx->Activate()) {
 					Monster* occupied_mon = GetMonster(vfx->GetTile());
-					if (occupied_mon) occupied_mon->Damage(1);
+					if (occupied_mon) occupied_mon->Damage(1, DamageTypes::LIGHTNING);
 				}
 				if (!vfx->Update()) {
 					delete vfx;
@@ -721,8 +726,8 @@ namespace UCG {
 			else {
 				if (vfx->Activate()) {	
 					Monster* occupied_mon = GetMonster(vfx->GetTile());
-					if (occupied_mon) occupied_mon->Damage(3);
-					else if (vfx->GetTile().Contents.Physical->Type() != BuildingType::EMPTY) vfx->GetTile().Contents.Physical->Damage(1);
+					if (occupied_mon) occupied_mon->Damage(3, DamageTypes::FIRE);
+					else if (vfx->GetTile().Contents.Physical->Type() != BuildingType::EMPTY) vfx->GetTile().Contents.Physical->Damage(1, DamageTypes::FIRE);
 				}
 				if (!vfx->Update()) {
 					delete vfx;

@@ -11,6 +11,7 @@ namespace UCG {
 		DIAGONAL       = 1 << 4,
     	DIRECTIONAL    = 1 << 5,
 		EMPTY          = 1 << 6,
+		NEXUSTILE      = 1 << 7,
 	};
 
 	class Behaviors {

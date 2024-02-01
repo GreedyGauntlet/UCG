@@ -30,12 +30,14 @@ namespace UCG {
 		m_Animations.AttackDown = { 15, 21, 10 };
 		m_Animations.AttackUp = { 36, 42, 10 };
 
+		AddWeakness({DamageTypes::LIGHTNING, 2.0f});
+
 		QueueAnimation({AnimationState::SPAWN, Orientation::NONE});
 		QueueAnimation({AnimationState::IDLE, Orientation::DL});
 	}
 
 	void Goblin::Attack() {
-		m_Context->GetMonster(FrontTile())->Damage(1);
+		m_Context->GetTarget(FrontTile())->Damage(1);
 	}
 
 	void Goblin::StartTurn() {
@@ -74,7 +76,7 @@ namespace UCG {
 		nexttile = FrontTile(curr_orient);	
 		los.clear();
 		los.push_back(nexttile);
-		targets = Behaviors::Target(m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR), 1, los);
+		targets = Behaviors::Target(m_Context, *this, (ObjectSelectFlags)(ObjectSelectFlags::LINEAR | ObjectSelectFlags::DIRECTIONAL | ObjectSelectFlags::NEAR | ObjectSelectFlags::NEXUSTILE), 1, los);
 		if (targets.size() > 0) {
 			PushAction(Action::ATTACK);
 			PushAction(Action::IDLE);

@@ -52,6 +52,7 @@ namespace UCG {
 
 	typedef std::tuple<int, int, int> Animation; // start frame, end frame, fps
 	typedef std::tuple<AnimationState, Orientation> AnimationCommand;
+	typedef std::tuple<DamageTypes, float> DamageModifier;
 
 	struct AnimationQueue {
 		std::vector<AnimationCommand> Queue;
@@ -91,6 +92,7 @@ namespace UCG {
 		bool Damaged = false;
 		bool Dead = false;
 		Orientation Direction = Orientation::DL;
+		std::vector<DamageModifier> Weaknesses;
 	};
 
 	class Monster {
@@ -103,6 +105,7 @@ namespace UCG {
 		virtual void Update(Flora::Timestep ts);
 		virtual void Destroy();
 		virtual void Damage(int damage, DamageTypes type = DamageTypes::NONE);
+		virtual void AddWeakness(DamageModifier mod);
 	public:
 		Flora::Entity Body() { return m_Body; }
 		bool Alive() { return !m_Status.Dead; }

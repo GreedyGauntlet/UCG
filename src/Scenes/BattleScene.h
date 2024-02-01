@@ -12,8 +12,8 @@ namespace UCG {
 	class Monster;
 
 	struct BoardObjects {
-		Flora::Entity PlayerNexus;
-		Flora::Entity OpponentNexus;
+		TileRef PlayerNexus;
+		TileRef OpponentNexus;
 		Board Tiles;
 		std::vector<Monster*> Monsters;
 		std::vector<VFX*> VFXs;
@@ -80,9 +80,13 @@ namespace UCG {
 		bool TileOccupied(Tile tile) { return TileOccupied(tile.Coordinates); }
 		Monster* GetMonster(TileRef tile);
 		Monster* GetMonster(Tile tile) { return GetMonster(tile.Coordinates); }
+		Monster* GetTarget(TileRef tile);
+		Monster* GetTarget(Tile tile) { return GetTarget(tile.Coordinates); }
 		TileRef GetTileRef(Flora::Entity tile);
 		Tile GetTile(TileRef tile) { return m_BoardObjects.Tiles[tile.r][tile.c]; }
 		Tile GetTile(Flora::Entity tile) { return GetTile(GetTileRef(tile)); }
+		TileRef GetPlayerNexus() { return m_BoardObjects.PlayerNexus; }
+		TileRef GetOpponentNexus() { return m_BoardObjects.OpponentNexus; }
 	private:
 		void CreateUI();
 		void UpdateUI();

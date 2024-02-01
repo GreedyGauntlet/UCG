@@ -16,6 +16,7 @@ namespace UCG {
 		if (!tile.HasComponent<Flora::ChildComponent>()) tile.AddComponent<Flora::ChildComponent>();
 		tile.GetComponent<Flora::ChildComponent>().AddChild(m_Body);
 		src.Path = FileUtils::Path("assets/Tiles/Forest.png");
+		AddWeakness({DamageTypes::FIRE, 3.0});
 	}
 
 }
